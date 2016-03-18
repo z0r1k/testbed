@@ -1,0 +1,18 @@
+{
+  "name": "webrtc-testbed",
+  "version": "0.0.1",
+  "description": "WebRTC interop testbed using apprtc",
+  "main": "apprtc.js",
+  "dependencies": {
+    "chromedriver": "^2.21.2",
+    "selenium-standalone": "^5.0.0",
+    "selenium-webdriver": "^2.52.0",
+    "tape": "^4.5.1"
+  },
+  "scripts": {
+    "start": "node start-selenium.js"
+  },
+  "devDependencies": {},
+  "author": "Philipp Hancke <philipp.hancke@gmail.com>",
+  "license": "to be decided upon"
+}
