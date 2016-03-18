@@ -3,7 +3,8 @@ var seleniumServer = require('selenium-standalone');
 seleniumServer.install({
     drivers: {
         chrome: {},
-        firefox: {}
+        firefox: {},
+        ie: false
     }
 }, function(err, cb) {
     seleniumServer.start(function (err, child) {
