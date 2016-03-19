@@ -98,6 +98,8 @@ function interop(t, browserA, browserB) {
   })
   .then(function(offerWithCandidates) {
     t.pass('offer ready to signal');
+
+    // since Chrome does not include a=end-of-candidates...
     if (offerWithCandidates.sdp.indexOf('\r\na=end-of-candidates\r\n') === -1) {
       var parts = splitSections(offerWithCandidates.sdp);
       for (var i = 1; i < parts.length; i++) {
@@ -105,6 +107,7 @@ function interop(t, browserA, browserB) {
       }
       offerWithCandidates.sdp = parts.join('');
     }
+
     return driverB.executeAsyncScript(function(offer) {
       var callback = arguments[arguments.length - 1];
 
@@ -140,6 +143,8 @@ function interop(t, browserA, browserB) {
   })
   .then(function(answerWithCandidates) {
     t.pass('answer ready to signal');
+
+    // since Chrome does not include a=end-of-candidates...
     if (answerWithCandidates.sdp.indexOf('\r\na=end-of-candidates\r\n') === -1) {
       var parts = splitSections(answerWithCandidates.sdp);
       for (var i = 1; i < parts.length; i++) {
@@ -147,6 +152,7 @@ function interop(t, browserA, browserB) {
       }
       answerWithCandidates.sdp = parts.join('');
     }
+
     return driverA.executeAsyncScript(function(answer) {
       var callback = arguments[arguments.length - 1];
       var isConnectedOrFailed = function() {
@@ -191,4 +197,12 @@ test('Firefox-Edge', function (t) {
 
 test('Edge-Firefox', function (t) {
   interop(t, 'MicrosoftEdge', 'firefox');
+});
+
+test('Chrome-Firefox', function (t) {
+  interop(t, 'chrome', 'firefox');
+});
+
+test('Firefox-Chrome', function (t) {
+  interop(t, 'firefox', 'chrome');
 });
