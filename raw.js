@@ -45,10 +45,91 @@ function buildDriver(browser, version, platform) {
       .build();
   // Set global executeAsyncScript() timeout (default is 0) to allow async
   // callbacks to be caught in tests.
-  driver.manage().timeouts().setScriptTimeout(2 * 1000);
+  driver.manage().timeouts().setScriptTimeout(5 * 1000);
 
   return driver;
 }
+
+var webrtc = {
+  create: function() {
+    window.pc = new RTCPeerConnection();
+  },
+  getUserMedia: function() {
+    var callback = arguments[arguments.length - 1];
+
+    navigator.mediaDevices.getUserMedia({audio: true, video: false})
+    .then(function(stream) {
+      window.localstream = stream;
+      callback();
+    })
+    .catch(function(err) {
+      callback(err);
+    });
+  },
+  addStream: function() {
+    pc.addStream(localstream);
+  },
+  createOffer: function() {
+    var callback = arguments[arguments.length - 1];
+
+    pc.createOffer()
+    .then(function(offer) {
+      callback(offer);
+    })
+    .catch(function(err) {
+      callback(err);
+    });
+  },
+  createAnswer: function() {
+    var callback = arguments[arguments.length - 1];
+
+    return pc.createAnswer()
+    .then(function(answer) {
+      callback(answer);
+    })
+    .catch(function(err) {
+      callback(err);
+    });
+  },
+  setLocalDescription: function(desc) {
+    var callback = arguments[arguments.length - 1];
+
+    pc.onicecandidate = function(event) {
+      if (!event.candidate) {
+        callback(pc.localDescription);
+      }
+    };
+    pc.setLocalDescription(new RTCSessionDescription(desc))
+    .catch(function(err) {
+      callback(err);
+    });
+  },
+  setRemoteDescription: function(desc) {
+    var callback = arguments[arguments.length - 1];
+
+    pc.setRemoteDescription(new RTCSessionDescription(desc))
+    .then(function() {
+      callback();
+    })
+    .catch(function(err) {
+      callback(err);
+    });
+  },
+  waitForIceConnectionStateChange: function() {
+    var callback = arguments[arguments.length - 1];
+
+    var isConnectedOrFailed = function() {
+      var state = pc.iceConnectionState;
+      if (state === 'connected' || state === 'completed' || state === 'failed') {
+        callback(state);
+        return true;
+      }
+    };
+    if (!isConnectedOrFailed()) {
+      pc.addEventListener('iceconnectionstatechange', isConnectedOrFailed);
+    }
+  }
+};
 
 function interop(t, browserA, browserB) {
   var driverA = buildDriver(browserA);
@@ -61,64 +142,26 @@ function interop(t, browserA, browserB) {
   })
   .then(function() {
     // create PeerConnection.
-    return driverA.executeScript(function() {
-      window.pc = new RTCPeerConnection();
-    })
+    return driverA.executeScript(webrtc.create);
   })
   .then(function() {
     // query getUserMedia.
-    return driverA.executeAsyncScript(function() {
-      var callback = arguments[arguments.length - 1];
-
-      navigator.mediaDevices.getUserMedia({audio: true, video: false})
-      .then(function(stream) {
-        window.localstream = stream;
-        callback();
-      })
-      .catch(function(err) {
-        callback(err);
-      });
-    })
+    return driverA.executeAsyncScript(webrtc.getUserMedia);
   })
   .then(function() {
     // add stream.
-    return driverA.executeScript(function() {
-      pc.addStream(localstream);
-    });
+    return driverA.executeScript(webrtc.addStream);
   })
   .then(function() {
     // call createOffer.
-    return driverA.executeAsyncScript(function() {
-      var callback = arguments[arguments.length - 1];
-
-      pc.createOffer()
-      .then(function(offer) {
-        callback(offer);
-      });
-      .catch(function(err) {
-        callback(err);
-      });
-    })
+    return driverA.executeAsyncScript(webrtc.createOffer);
   })
   .then(function(offer) {
     t.pass('created offer');
     // modify offer here?
 
     // setLocalDescription, return non-trickle offer.
-    return driverA.executeAsyncScript(function(offer) {
-      var callback = arguments[arguments.length - 1];
-      console.log(offer);
-
-      pc.onicecandidate = function(event) {
-        if (!event.candidate) {
-          callback(pc.localDescription);
-        }
-      };
-      pc.setLocalDescription(new RTCSessionDescription(offer))
-      .catch(function(err) {
-        callback(err);
-      });
-    }, offer);
+    return driverA.executeAsyncScript(webrtc.setLocalDescription, offer);
   })
   .then(function(offerWithCandidates) {
     t.pass('offer ready to signal');
@@ -132,41 +175,20 @@ function interop(t, browserA, browserB) {
       offerWithCandidates.sdp = parts.join('');
     }
 
-    // Create other peerconnection, setRemoteDescription and createAnswer.
-    return driverB.executeAsyncScript(function(offer) {
-      var callback = arguments[arguments.length - 1];
-
-      window.pc = new RTCPeerConnection();
-      pc.setRemoteDescription(new RTCSessionDescription(offer))
-      .then(function() {
-        return pc.createAnswer();
-      })
-      .then(function(answer) {
-        callback(answer);
-      })
-      .catch(function(err) {
-        callback(err);
-      });
-    }, offerWithCandidates)
+    // Create other peerconnection, setRemoteDescription
+    driverB.executeScript(webrtc.create);
+    return driverB.executeAsyncScript(webrtc.setRemoteDescription, offerWithCandidates);
+  })
+  .then(function() {
+    // Call createAnswer.
+    return driverB.executeAsyncScript(webrtc.createAnswer);
   })
   .then(function(answer) {
     t.pass('created answer');
     // modify answer here?
 
     // set answer, return non-trickle answer.
-    return driverB.executeAsyncScript(function(answer) {
-      var callback = arguments[arguments.length - 1];
-
-      pc.onicecandidate = function(event) {
-        if (!event.candidate) {
-          callback(pc.localDescription);
-        }
-      };
-      pc.setLocalDescription(new RTCSessionDescription(answer))
-      .catch(function(err) {
-        callback(err);
-      });
-    }, answer);
+    return driverB.executeAsyncScript(webrtc.setLocalDescription, answer);
   })
   .then(function(answerWithCandidates) {
     t.pass('answer ready to signal');
@@ -180,22 +202,12 @@ function interop(t, browserA, browserB) {
       answerWithCandidates.sdp = parts.join('');
     }
 
+    return driverA.executeAsyncScript(webrtc.setRemoteDescription, answerWithCandidates);
+  })
+  .then(function() {
     // wait for the iceConnectionState to become either connected/completed
     // or failed.
-    return driverA.executeAsyncScript(function(answer) {
-      var callback = arguments[arguments.length - 1];
-      var isConnectedOrFailed = function() {
-        var state = pc.iceConnectionState;
-        if (state === 'connected' || state === 'completed' || state === 'failed') {
-          callback(state);
-        }
-      };
-      pc.addEventListener('iceconnectionstatechange', isConnectedOrFailed);
-      pc.setRemoteDescription(new RTCSessionDescription(answer))
-      .catch(function(err) {
-        callback(err);
-      });
-    }, answerWithCandidates);
+    return driverA.executeAsyncScript(webrtc.waitForIceConnectionStateChange);
   })
   .then(function(iceConnectionState) {
     t.ok(iceConnectionState !== 'failed', 'ICE connection is established');
