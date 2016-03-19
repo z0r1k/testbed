@@ -60,20 +60,41 @@ function interop(t, browserA, browserB) {
     return driverB.get('https://fippo.github.io/adapter/testpage.html')
   })
   .then(function() {
-    // create PeerConnection, query getUserMedia and createOffer.
+    // create PeerConnection.
+    return driverA.executeScript(function() {
+      window.pc = new RTCPeerConnection();
+    })
+  })
+  .then(function() {
+    // query getUserMedia.
     return driverA.executeAsyncScript(function() {
       var callback = arguments[arguments.length - 1];
 
-      window.pc = new RTCPeerConnection();
       navigator.mediaDevices.getUserMedia({audio: true, video: false})
       .then(function(stream) {
         window.localstream = stream;
-        pc.addStream(stream);
-        pc.createOffer()
-        .then(function(offer) {
-          callback(offer);
-        });
+        callback();
       })
+      .catch(function(err) {
+        callback(err);
+      });
+    })
+  })
+  .then(function() {
+    // add stream.
+    return driverA.executeScript(function() {
+      pc.addStream(localstream);
+    });
+  })
+  .then(function() {
+    // call createOffer.
+    return driverA.executeAsyncScript(function() {
+      var callback = arguments[arguments.length - 1];
+
+      pc.createOffer()
+      .then(function(offer) {
+        callback(offer);
+      });
       .catch(function(err) {
         callback(err);
       });
