@@ -9,7 +9,6 @@ seleniumServer.install({
     }
 }, function(err, cb) {
     seleniumServer.start(function (err, child) {
-        console.log(err, child);
         if (err) {
             console.error(err);
             return;

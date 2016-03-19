@@ -10,9 +10,6 @@ var webdriver = require('selenium-webdriver');
 var chrome = require('selenium-webdriver/chrome');
 var firefox = require('selenium-webdriver/firefox');
 
-// how long to wait after connection has been established. allows visual check.
-var sleep = 3000;
-
 function buildDriver(browser, version, platform) {
   // Firefox options.
   var profile = new firefox.Profile();
@@ -45,6 +42,7 @@ function buildDriver(browser, version, platform) {
 
   return driver;
 }
+
 // Helper function for basic interop test.
 // see https://apprtc.appspot.com/params.html for queryString options (outdated...)
 function interop(t, browserA, browserB, queryString) {
@@ -107,7 +105,36 @@ function interop(t, browserA, browserB, queryString) {
   .then(function(iceConnectionState) {
     t.ok(iceConnectionState === 'connected' || iceConnectionState === 'completed',
         'ice connection state is connected or completed');
-    return driverA.sleep(sleep);
+  })
+  .then(function() {
+    // bundle up video frame cheecker.
+    return new Promise(function(resolve, reject) {
+      var bundle = require('browserify')({standalone: 'VideoFrameChecker'});
+      bundle.add('./videoframechecker');
+      bundle.bundle(function (err, source) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(source);
+        }
+      });
+    })
+  })
+  .then(function(framecheckersource) {
+    driverA.executeScript(framecheckersource.toString());
+    driverA.sleep(1000); // avoid timing issues on high latency (relayed) connections.
+    return driverA.executeAsyncScript(function() {
+      var callback = arguments[arguments.length - 1];
+      var framechecker = new VideoFrameChecker(document.getElementById('remote-video'));
+      framechecker.checkVideoFrame_(); // start it
+      window.setTimeout(function() {
+        framechecker.stop();
+        callback(framechecker.frameStats);
+      }, 2000);
+    });
+  })
+  .then(function(frameStats) {
+    t.ok(frameStats.numFrames > 0, 'video frames received');
   })
   .then(function() {
     // Get the info box text.
@@ -153,14 +180,13 @@ test('Firefox-Firefox', function (t) {
   });
 });
 
-/* unclear how to evaluate audio-only
-test('Chrome-Chrome, audio-only', function (t) {
-  interop(t, 'chrome', 'chrome', '?audio=true&video=false')
-  .then(function(info) {
-    t.end();
-  });
-});
-*/
+//unclear how to evaluate audio-only
+//test('Chrome-Chrome, audio-only', function (t) {
+//  interop(t, 'chrome', 'chrome', '?audio=true&video=false')
+//  .then(function(info) {
+//    t.end();
+//  });
+//});
 
 test('Chrome-Chrome, icetransports=relay', function (t) {
   interop(t, 'chrome', 'chrome', '?it=relay')
