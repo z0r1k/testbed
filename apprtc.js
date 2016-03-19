@@ -10,8 +10,8 @@ var webdriver = require('selenium-webdriver');
 var chrome = require('selenium-webdriver/chrome');
 var firefox = require('selenium-webdriver/firefox');
 
-// how long to wait after both browsers went to the URL.
-var sleep = 5000;
+// how long to wait after connection has been established. allows visual check.
+var sleep = 3000;
 
 function buildDriver(browser, version, platform) {
   // Firefox options.
@@ -89,7 +89,27 @@ function interop(t, browserA, browserB, queryString) {
     return driverA.executeScript('appController.infoBox_.showInfoDiv();');
   })
   .then(function() {
-    driverA.sleep(5000);
+    // wait for the ice connection state change to connected/completed.
+    driverA.manage().timeouts().setScriptTimeout(10 * 1000);
+    return driverA.executeAsyncScript(function() {
+      var callback = arguments[arguments.length - 1];
+      var isConnectedOrFailed = function() {
+        var state = appController.call_.pcClient_.pc_.iceConnectionState;
+        if (state === 'connected' || state === 'completed' || state === 'failed') {
+          callback(state);
+        }
+      };
+      appController.call_.pcClient_.pc_.addEventListener('iceconnectionstatechange',
+          isConnectedOrFailed);
+    });
+    isConnectedOrFailed();
+  })
+  .then(function(iceConnectionState) {
+    t.ok(iceConnectionState === 'connected' || iceConnectionState === 'completed',
+        'ice connection state is connected or completed');
+    return driverA.sleep(sleep);
+  })
+  .then(function() {
     // Get the info box text.
     return driverA.findElement(webdriver.By.id('info-div')).getText();
   })
@@ -133,12 +153,14 @@ test('Firefox-Firefox', function (t) {
   });
 });
 
+/* unclear how to evaluate audio-only
 test('Chrome-Chrome, audio-only', function (t) {
   interop(t, 'chrome', 'chrome', '?audio=true&video=false')
   .then(function(info) {
     t.end();
   });
 });
+*/
 
 test('Chrome-Chrome, icetransports=relay', function (t) {
   interop(t, 'chrome', 'chrome', '?it=relay')
@@ -169,9 +191,11 @@ test('Chrome-Chrome, VP9', function (t) {
   });
 });
 
+/*
 test('Firefox-Firefox, VP9', function (t) {
   interop(t, 'firefox', 'firefox', '?vsc=VP9&vrc=VP9')
   .then(function(info) {
     t.end();
   });
 });
+*/

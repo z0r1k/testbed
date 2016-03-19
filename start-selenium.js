@@ -1,4 +1,5 @@
 var seleniumServer = require('selenium-standalone');
+var test = require('tape');
 
 seleniumServer.install({
     drivers: {
@@ -14,5 +15,10 @@ seleniumServer.install({
             return;
         }
         require('./apprtc');
+
+        test('shutdown', function(t) {
+            child.kill();
+            t.end();
+        });
     });
 });
