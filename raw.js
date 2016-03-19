@@ -157,9 +157,9 @@ function interop(t, browserA, browserB) {
 }
 
 test('Firefox-Edge', function (t) {
-  interop(t, 'firefox', 'edge');
+  interop(t, 'firefox', 'MicrosoftEdge');
 });
 
 test('Edge-Firefox', function (t) {
-  interop(t, 'edge', 'firefox');
+  interop(t, 'MicrosoftEdge', 'firefox');
 });
