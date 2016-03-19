@@ -10,13 +10,6 @@ var webdriver = require('selenium-webdriver');
 var chrome = require('selenium-webdriver/chrome');
 var firefox = require('selenium-webdriver/firefox');
 
-function splitSections(blob) {
-  var parts = blob.split('\r\nm=');
-  return parts.map(function(part, index) {
-    return (index > 0 ? 'm=' + part : part).trim() + '\r\n';
-  });
-}
-
 function buildDriver(browser, version, platform) {
   // Firefox options.
   var profile = new firefox.Profile();
@@ -50,11 +43,18 @@ function buildDriver(browser, version, platform) {
   return driver;
 }
 
-var webrtc = {
-  create: function() {
+function WebRTCClient(driver) {
+  this.driver = driver;
+}
+
+WebRTCClient.prototype.create = function() {
+  this.driver.executeScript(function() {
     window.pc = new RTCPeerConnection();
-  },
-  getUserMedia: function() {
+  });
+};
+
+WebRTCClient.prototype.getUserMedia = function() {
+  return this.driver.executeAsyncScript(function() {
     var callback = arguments[arguments.length - 1];
 
     navigator.mediaDevices.getUserMedia({audio: true, video: false})
@@ -65,11 +65,17 @@ var webrtc = {
     .catch(function(err) {
       callback(err);
     });
-  },
-  addStream: function() {
+  });
+};
+
+WebRTCClient.prototype.addStream = function() {
+  return this.driver.executeScript(function() {
     pc.addStream(localstream);
-  },
-  createOffer: function() {
+  });
+};
+
+WebRTCClient.prototype.createOffer = function() {
+  return this.driver.executeAsyncScript(function() {
     var callback = arguments[arguments.length - 1];
 
     pc.createOffer()
@@ -79,8 +85,11 @@ var webrtc = {
     .catch(function(err) {
       callback(err);
     });
-  },
-  createAnswer: function() {
+  });
+};
+
+WebRTCClient.prototype.createAnswer = function() {
+  return this.driver.executeAsyncScript(function() {
     var callback = arguments[arguments.length - 1];
 
     return pc.createAnswer()
@@ -90,21 +99,44 @@ var webrtc = {
     .catch(function(err) {
       callback(err);
     });
-  },
-  setLocalDescription: function(desc) {
+  });
+};
+
+// resolves with non-trickle description including candidates.
+WebRTCClient.prototype.setLocalDescription = function(desc) {
+  return this.driver.executeAsyncScript(function(desc) {
     var callback = arguments[arguments.length - 1];
 
     pc.onicecandidate = function(event) {
       if (!event.candidate) {
-        callback(pc.localDescription);
+        // since Chrome does not include a=end-of-candidates...
+        var desc = {
+          type: pc.localDescription.type,
+          sdp: pc.localDescription.sdp
+        }
+        if (desc.sdp.indexOf('\r\na=end-of-candidates\r\n') === -1) {
+          var parts = desc.sdp.split('\r\nm=').map(function(part, index) {
+            return (index > 0 ? 'm=' + part : part).trim() + '\r\n';
+          });
+          for (var i = 1; i < parts.length; i++) {
+            parts[i] += 'a=end-of-candidates\r\n';
+          }
+          desc.sdp = parts.join('');
+        }
+
+        callback(desc);
       }
     };
+
     pc.setLocalDescription(new RTCSessionDescription(desc))
     .catch(function(err) {
       callback(err);
     });
-  },
-  setRemoteDescription: function(desc) {
+  }, desc);
+};
+
+WebRTCClient.prototype.setRemoteDescription = function(desc) {
+  return this.driver.executeAsyncScript(function(desc) {
     var callback = arguments[arguments.length - 1];
 
     pc.setRemoteDescription(new RTCSessionDescription(desc))
@@ -114,8 +146,11 @@ var webrtc = {
     .catch(function(err) {
       callback(err);
     });
-  },
-  waitForIceConnectionStateChange: function() {
+  }, desc);
+};
+
+WebRTCClient.prototype.waitForIceConnectionStateChange = function() {
+  return this.driver.executeAsyncScript(function() {
     var callback = arguments[arguments.length - 1];
 
     var isConnectedOrFailed = function() {
@@ -128,12 +163,15 @@ var webrtc = {
     if (!isConnectedOrFailed()) {
       pc.addEventListener('iceconnectionstatechange', isConnectedOrFailed);
     }
-  }
+  });
 };
 
 function interop(t, browserA, browserB) {
   var driverA = buildDriver(browserA);
   var driverB = buildDriver(browserB);
+
+  var clientA = new WebRTCClient(driverA);
+  var clientB = new WebRTCClient(driverB);
 
   // static page with adapter shim
   driverA.get('https://fippo.github.io/adapter/testpage.html')
@@ -141,73 +179,41 @@ function interop(t, browserA, browserB) {
     return driverB.get('https://fippo.github.io/adapter/testpage.html')
   })
   .then(function() {
-    // create PeerConnection.
-    return driverA.executeScript(webrtc.create);
+    clientA.create();
+    return clientA.getUserMedia();
   })
   .then(function() {
-    // query getUserMedia.
-    return driverA.executeAsyncScript(webrtc.getUserMedia);
+    t.pass('got user media');
+    return clientA.addStream();
   })
   .then(function() {
-    // add stream.
-    return driverA.executeScript(webrtc.addStream);
-  })
-  .then(function() {
-    // call createOffer.
-    return driverA.executeAsyncScript(webrtc.createOffer);
+    return clientA.createOffer();
   })
   .then(function(offer) {
     t.pass('created offer');
-    // modify offer here?
-
-    // setLocalDescription, return non-trickle offer.
-    return driverA.executeAsyncScript(webrtc.setLocalDescription, offer);
+    return clientA.setLocalDescription(offer); // modify offer here?
   })
   .then(function(offerWithCandidates) {
     t.pass('offer ready to signal');
 
-    // since Chrome does not include a=end-of-candidates...
-    if (offerWithCandidates.sdp.indexOf('\r\na=end-of-candidates\r\n') === -1) {
-      var parts = splitSections(offerWithCandidates.sdp);
-      for (var i = 1; i < parts.length; i++) {
-        parts[i] += 'a=end-of-candidates\r\n';
-      }
-      offerWithCandidates.sdp = parts.join('');
-    }
-
-    // Create other peerconnection, setRemoteDescription
-    driverB.executeScript(webrtc.create);
-    return driverB.executeAsyncScript(webrtc.setRemoteDescription, offerWithCandidates);
+    clientB.create();
+    return clientB.setRemoteDescription(offerWithCandidates);
   })
   .then(function() {
-    // Call createAnswer.
-    return driverB.executeAsyncScript(webrtc.createAnswer);
+    return clientB.createAnswer();
   })
   .then(function(answer) {
     t.pass('created answer');
-    // modify answer here?
-
-    // set answer, return non-trickle answer.
-    return driverB.executeAsyncScript(webrtc.setLocalDescription, answer);
+    return clientB.setLocalDescription(answer); // modify answer here?
   })
   .then(function(answerWithCandidates) {
     t.pass('answer ready to signal');
-
-    // since Chrome does not include a=end-of-candidates...
-    if (answerWithCandidates.sdp.indexOf('\r\na=end-of-candidates\r\n') === -1) {
-      var parts = splitSections(answerWithCandidates.sdp);
-      for (var i = 1; i < parts.length; i++) {
-        parts[i] += 'a=end-of-candidates\r\n';
-      }
-      answerWithCandidates.sdp = parts.join('');
-    }
-
-    return driverA.executeAsyncScript(webrtc.setRemoteDescription, answerWithCandidates);
+    return clientA.setRemoteDescription(answerWithCandidates);
   })
   .then(function() {
     // wait for the iceConnectionState to become either connected/completed
     // or failed.
-    return driverA.executeAsyncScript(webrtc.waitForIceConnectionStateChange);
+    return clientA.waitForIceConnectionStateChange();
   })
   .then(function(iceConnectionState) {
     t.ok(iceConnectionState !== 'failed', 'ICE connection is established');
