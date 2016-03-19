@@ -60,6 +60,7 @@ function interop(t, browserA, browserB) {
     return driverB.get('https://fippo.github.io/adapter/testpage.html')
   })
   .then(function() {
+    // create PeerConnection, query getUserMedia and createOffer.
     return driverA.executeAsyncScript(function() {
       var callback = arguments[arguments.length - 1];
 
@@ -81,6 +82,8 @@ function interop(t, browserA, browserB) {
   .then(function(offer) {
     t.pass('created offer');
     // modify offer here?
+
+    // setLocalDescription, return non-trickle offer.
     return driverA.executeAsyncScript(function(offer) {
       var callback = arguments[arguments.length - 1];
       console.log(offer);
@@ -108,6 +111,7 @@ function interop(t, browserA, browserB) {
       offerWithCandidates.sdp = parts.join('');
     }
 
+    // Create other peerconnection, setRemoteDescription and createAnswer.
     return driverB.executeAsyncScript(function(offer) {
       var callback = arguments[arguments.length - 1];
 
@@ -127,6 +131,8 @@ function interop(t, browserA, browserB) {
   .then(function(answer) {
     t.pass('created answer');
     // modify answer here?
+
+    // set answer, return non-trickle answer.
     return driverB.executeAsyncScript(function(answer) {
       var callback = arguments[arguments.length - 1];
 
@@ -153,6 +159,8 @@ function interop(t, browserA, browserB) {
       answerWithCandidates.sdp = parts.join('');
     }
 
+    // wait for the iceConnectionState to become either connected/completed
+    // or failed.
     return driverA.executeAsyncScript(function(answer) {
       var callback = arguments[arguments.length - 1];
       var isConnectedOrFailed = function() {
@@ -171,6 +179,9 @@ function interop(t, browserA, browserB) {
   .then(function(iceConnectionState) {
     t.ok(iceConnectionState !== 'failed', 'ICE connection is established');
   })
+  /*
+   * here is where the fun starts. getStats etc
+   */
   .then(function() {
     driverA.quit();
     driverB.quit()
