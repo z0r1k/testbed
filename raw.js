@@ -47,17 +47,17 @@ function WebRTCClient(driver) {
   this.driver = driver;
 }
 
-WebRTCClient.prototype.create = function() {
-  this.driver.executeScript(function() {
-    window.pc = new RTCPeerConnection();
-  });
+WebRTCClient.prototype.create = function(pcConfig) {
+  this.driver.executeScript(function(pcConfig) {
+    window.pc = new RTCPeerConnection(pcConfig);
+  }, pcConfig);
 };
 
-WebRTCClient.prototype.getUserMedia = function() {
-  return this.driver.executeAsyncScript(function() {
+WebRTCClient.prototype.getUserMedia = function(constraints) {
+  return this.driver.executeAsyncScript(function(constraints) {
     var callback = arguments[arguments.length - 1];
 
-    navigator.mediaDevices.getUserMedia({audio: true, video: false})
+    navigator.mediaDevices.getUserMedia(constraints)
     .then(function(stream) {
       window.localstream = stream;
       callback();
@@ -65,7 +65,7 @@ WebRTCClient.prototype.getUserMedia = function() {
     .catch(function(err) {
       callback(err);
     });
-  });
+  }, constraints || {audio: true, video: true});
 };
 
 WebRTCClient.prototype.addStream = function() {
@@ -135,6 +135,8 @@ WebRTCClient.prototype.setLocalDescription = function(desc) {
   }, desc);
 };
 
+// TODO: should this return id of media element and create one
+//      for each stream?
 WebRTCClient.prototype.setRemoteDescription = function(desc) {
   return this.driver.executeAsyncScript(function(desc) {
     var callback = arguments[arguments.length - 1];
@@ -180,7 +182,7 @@ function interop(t, browserA, browserB) {
   })
   .then(function() {
     clientA.create();
-    return clientA.getUserMedia();
+    return clientA.getUserMedia({audio: true});
   })
   .then(function() {
     t.pass('got user media');
