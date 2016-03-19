@@ -156,6 +156,14 @@ function interop(t, browserA, browserB) {
   });
 }
 
+test('Chrome-Edge', function (t) {
+  interop(t, 'chrome', 'MicrosoftEdge');
+});
+
+test('Edge-Chrome', function (t) {
+  interop(t, 'MicrosoftEdge', 'chrome');
+});
+
 test('Firefox-Edge', function (t) {
   interop(t, 'firefox', 'MicrosoftEdge');
 });
