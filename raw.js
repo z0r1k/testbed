@@ -177,10 +177,6 @@ function interop(t, browserA, browserB) {
   });
 }
 
-test('Chrome-Chrome', function (t) {
-  interop(t, 'chrome', 'chrome');
-});
-/*
 test('Chrome-Edge', function (t) {
   interop(t, 'chrome', 'MicrosoftEdge');
 });
@@ -196,4 +192,3 @@ test('Firefox-Edge', function (t) {
 test('Edge-Firefox', function (t) {
   interop(t, 'MicrosoftEdge', 'firefox');
 });
-*/
