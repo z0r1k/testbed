@@ -10,6 +10,13 @@ var webdriver = require('selenium-webdriver');
 var chrome = require('selenium-webdriver/chrome');
 var firefox = require('selenium-webdriver/firefox');
 
+function splitSections(blob) {
+  var parts = blob.split('\r\nm=');
+  return parts.map(function(part, index) {
+    return (index > 0 ? 'm=' + part : part).trim() + '\r\n';
+  });
+}
+
 function buildDriver(browser, version, platform) {
   // Firefox options.
   var profile = new firefox.Profile();
@@ -91,6 +98,13 @@ function interop(t, browserA, browserB) {
   })
   .then(function(offerWithCandidates) {
     t.pass('offer ready to signal');
+    if (offerWithCandidates.sdp.indexOf('\r\na=end-of-candidates\r\n') === -1) {
+      var parts = splitSections(offerWithCandidates.sdp);
+      for (var i = 1; i < parts.length; i++) {
+        parts[i] += 'a=end-of-candidates\r\n';
+      }
+      offerWithCandidates.sdp = parts.join('');
+    }
     return driverB.executeAsyncScript(function(offer) {
       var callback = arguments[arguments.length - 1];
 
@@ -126,6 +140,13 @@ function interop(t, browserA, browserB) {
   })
   .then(function(answerWithCandidates) {
     t.pass('answer ready to signal');
+    if (answerWithCandidates.sdp.indexOf('\r\na=end-of-candidates\r\n') === -1) {
+      var parts = splitSections(answerWithCandidates.sdp);
+      for (var i = 1; i < parts.length; i++) {
+        parts[i] += 'a=end-of-candidates\r\n';
+      }
+      answerWithCandidates.sdp = parts.join('');
+    }
     return driverA.executeAsyncScript(function(answer) {
       var callback = arguments[arguments.length - 1];
       var isConnectedOrFailed = function() {
@@ -156,6 +177,10 @@ function interop(t, browserA, browserB) {
   });
 }
 
+test('Chrome-Chrome', function (t) {
+  interop(t, 'chrome', 'chrome');
+});
+/*
 test('Chrome-Edge', function (t) {
   interop(t, 'chrome', 'MicrosoftEdge');
 });
@@ -171,3 +196,4 @@ test('Firefox-Edge', function (t) {
 test('Edge-Firefox', function (t) {
   interop(t, 'MicrosoftEdge', 'firefox');
 });
+*/
