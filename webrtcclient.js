@@ -103,17 +103,19 @@ WebRTCClient.prototype.setRemoteDescription = function(desc) {
   return this.driver.executeAsyncScript(function(desc) {
     var callback = arguments[arguments.length - 1];
 
-    pc.addEventListener('addstream', function(event) {
+    pc.onaddstream = function(event) {
         var vid = document.createElement('video');
         vid.autoplay = true;
         vid.srcObject = event.stream;
         document.body.appendChild(vid);
 
-        window.framechecker = new VideoFrameChecker(vid);
-        vid.addEventListener('resize', function() {
-          framechecker.checkVideoFrame_(); // start it
-        });
-    });
+        if (stream.getVideoTracks().length) {
+          window.framechecker = new VideoFrameChecker(vid);
+          vid.addEventListener('resize', function() {
+            framechecker.checkVideoFrame_(); // start it
+          });
+        }
+    };
     pc.setRemoteDescription(new RTCSessionDescription(desc))
     .then(function() {
       callback();
