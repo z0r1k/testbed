@@ -110,6 +110,9 @@ WebRTCClient.prototype.setRemoteDescription = function(desc) {
         document.body.appendChild(vid);
 
         window.framechecker = new VideoFrameChecker(vid);
+        vid.addEventListener('resize', function() {
+          framechecker.checkVideoFrame_(); // start it
+        });
     });
     pc.setRemoteDescription(new RTCSessionDescription(desc))
     .then(function() {
@@ -135,6 +138,12 @@ WebRTCClient.prototype.waitForIceConnectionStateChange = function() {
     if (!isConnectedOrFailed()) {
       pc.addEventListener('iceconnectionstatechange', isConnectedOrFailed);
     }
+  });
+};
+
+WebRTCClient.prototype.getFrameStats = function() {
+  return this.driver.executeScript(function() {
+    return window.framechecker.frameStats;
   });
 };
 

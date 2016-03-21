@@ -85,6 +85,13 @@ function video(t, browserA, browserB, preferredVideoCodec) {
    * here is where the fun starts. getStats etc
    */
   .then(function() {
+    driverA.sleep(3000);
+    return clientB.getFrameStats();
+  })
+  .then(function(frameStats) {
+    t.ok(frameStats.numFrames > 0, 'video frames received');
+  })
+  .then(function() {
     driverA.quit();
     driverB.quit()
     .then(function() {
@@ -96,6 +103,22 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   });
 }
 
+test('Chrome-Chrome, VP8', function(t) {
+  video(t, 'chrome', 'chrome', 'VP8');
+});
+
+test('Chrome-Firefox, VP8', function(t) {
+  video(t, 'chrome', 'firefox', 'VP8');
+});
+
+test('Firefox-Firefox, VP8', function(t) {
+  video(t, 'firefox', 'firefox', 'VP8');
+});
+
+test('Firefox-Chrome, VP8', function(t) {
+  video(t, 'firefox', 'chrome', 'VP8');
+});
+
 test('Chrome-Chrome, VP9', function(t) {
   video(t, 'chrome', 'chrome', 'VP9');
 });
@@ -103,6 +126,16 @@ test('Chrome-Chrome, VP9', function(t) {
 test('Firefox-Firefox, VP9', function(t) {
   video(t, 'firefox', 'firefox', 'VP9');
 });
+
+/* need to figure out command line flag for this
+ * currently only via chrome://flags + requires restart
+ * (or using a modified local state file in profile...)
+ */
+/*
+test('Chrome-Chrome, H264', function(t) {
+  video(t, 'chrome', 'chrome', 'H264');
+});
+*/
 
 /* when using selenium with fresh profiles that does not contain
  * openh264 and h264 is missing...
