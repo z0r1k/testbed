@@ -4,12 +4,15 @@ var firefox = require('selenium-webdriver/firefox');
 
 function buildDriver(browser, version, platform) {
   // Firefox options.
+  //var profile = new firefox.Profile('h264profile'); // contains gmp-gmpopenh264/1.5.3
   var profile = new firefox.Profile();
   profile.setPreference('media.navigator.streams.fake', true);
   profile.setPreference('media.navigator.permission.disabled', true);
   // note: interoperable with Chrome only in FF46+
   profile.setPreference('media.peerconnection.video.vp9_enabled', true);
   profile.setPreference('xpinstall.signatures.required', false);
+
+  profile.setPreference('media.gmp-gmpopenh264.version', '1.5.3'); // openh264
 
   var firefoxOptions = new firefox.Options()
       .setProfile(profile);

@@ -131,11 +131,16 @@ test('Firefox-Firefox, VP9', function(t) {
 test('Chrome-Chrome, H264', function(t) {
   video(t, 'chrome', 'chrome', 'H264');
 });
-*/
 
-/* when using selenium with fresh profiles that does not contain
- * openh264 and h264 is missing...
 test('Firefox-Firefox, H264', function(t) {
   video(t, 'firefox', 'firefox', 'H264');
+});
+
+test('Chrome-Firefox, H264', function(t) {
+  video(t, 'chrome', 'firefox', 'H264');
+});
+
+test('Firefox-Chrome, H264', function(t) {
+  video(t, 'firefox', 'chrome', 'H264');
 });
 */
