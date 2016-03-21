@@ -65,6 +65,12 @@ function interop(t, browserA, browserB) {
    * here is where the fun starts. getStats etc
    */
   .then(function() {
+    return clientA.getStats();
+  })
+  .then(function(stats) {
+    console.log(stats);
+  })
+  .then(function() {
     driverA.quit();
     driverB.quit()
     .then(function() {

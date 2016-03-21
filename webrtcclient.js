@@ -141,6 +141,17 @@ WebRTCClient.prototype.waitForIceConnectionStateChange = function() {
   });
 };
 
+WebRTCClient.prototype.getStats = function() {
+  return this.driver.executeAsyncScript(function(constraints) {
+    var callback = arguments[arguments.length - 1];
+
+    pc.getStats(null)
+    .then(function(stats) {
+      callback(stats);
+    });
+  });
+};
+
 WebRTCClient.prototype.getFrameStats = function() {
   return this.driver.executeScript(function() {
     return window.framechecker.frameStats;
