@@ -127,10 +127,6 @@ test('Firefox-Firefox, VP9', function(t) {
   video(t, 'firefox', 'firefox', 'VP9');
 });
 
-/* need to figure out command line flag for this
- * currently only via chrome://flags + requires restart
- * (or using a modified local state file in profile...)
- */
 /*
 test('Chrome-Chrome, H264', function(t) {
   video(t, 'chrome', 'chrome', 'H264');
