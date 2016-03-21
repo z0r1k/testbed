@@ -1,4 +1,4 @@
-/* Interop testing using apprtc.appspot.com using selenium 
+/* webrtc interop testing using using selenium 
  * Copyright (c) 2016, Philipp Hancke
  * This work has been sponsored by the International Multimedia
  * Teleconferencing Consortium in preparation for the 
@@ -127,6 +127,10 @@ test('Firefox-Firefox, VP9', function(t) {
   video(t, 'firefox', 'firefox', 'VP9');
 });
 
+// H264 requires Chrome 50+ and a Firefox
+// profile pre-seeded with the right binary,
+// see https://github.com/fippo/testbed/issues/1
+// works but...
 /*
 test('Chrome-Chrome, H264', function(t) {
   video(t, 'chrome', 'chrome', 'H264');

@@ -1,4 +1,4 @@
-/* Interop testing using apprtc.appspot.com using selenium 
+/* webrtc interop testing using using selenium 
  * Copyright (c) 2016, Philipp Hancke
  * This work has been sponsored by the International Multimedia
  * Teleconferencing Consortium in preparation for the 
