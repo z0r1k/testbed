@@ -7,7 +7,8 @@ function buildDriver(browser, version, platform) {
   var profile = new firefox.Profile();
   profile.setPreference('media.navigator.streams.fake', true);
   profile.setPreference('media.navigator.permission.disabled', true);
-  //profile.setPreference('media.peerconnection.video.vp9_enabled', true);
+  // note: interoperable with Chrome only in FF46+
+  profile.setPreference('media.peerconnection.video.vp9_enabled', true);
   profile.setPreference('xpinstall.signatures.required', false);
 
   var firefoxOptions = new firefox.Options()
