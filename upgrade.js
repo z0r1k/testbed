@@ -34,6 +34,7 @@ function mangle(sdp) {
   return mediaSections.join('');
 }
 
+// we use addStream twice and pretend to be a single stream to work around FF bugs.
 function replaceSecondStreamId(sdp) {
   var mediaSections = SDPUtils.splitSections(sdp);
 
