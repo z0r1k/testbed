@@ -28,7 +28,7 @@ function mangle(sdp) {
       parts.shift();
       mediaSections[i] += 'a=' + parts.join(' ') + '\r\n';
     } else if (specMsid.length > 0 && cnames.length && !chromeMsid.length) {
-      mediaSections[i] += cnames[0].split(' ', 1)[0] + ' ' + specMsid[0].substr(2);
+      mediaSections[i] += cnames[0].split(' ', 1)[0] + ' ' + specMsid[0].substr(2) + '\r\n';
     }
   }
   return mediaSections.join('');
@@ -146,13 +146,11 @@ function upgrade(t, browserA, browserB) {
     driverA.sleep(3000);
   })
   .then(function() {
-    /*
     driverA.quit();
     driverB.quit()
     .then(function() {
       t.end();
     });
-    */
   })
   .catch(function(err) {
     t.fail(err);
@@ -161,4 +159,16 @@ function upgrade(t, browserA, browserB) {
 
 test('Chrome-Chrome', function (t) {
   upgrade(t, 'chrome', 'chrome');
+});
+
+test('Firefox-Firefox', function (t) {
+  upgrade(t, 'firefox', 'firefox');
+});
+
+test('Chrome-Firefox', function (t) {
+  upgrade(t, 'chrome', 'firefox');
+});
+
+test('Firefox-Chrome', function (t) {
+  upgrade(t, 'firefox', 'chrome');
 });
