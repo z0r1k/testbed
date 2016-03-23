@@ -107,7 +107,7 @@ WebRTCClient.prototype.setRemoteDescription = function(desc) {
         var video = document.createElement('video');
         video.autoplay = true;
         video.srcObject = event.stream;
-        document.body.appendChild(vid);
+        document.body.appendChild(video);
 
         if (event.stream.getVideoTracks().length) {
           window.framechecker = new VideoFrameChecker(video);
