@@ -168,10 +168,36 @@ test('Firefox-Firefox, H264', function (t) {
   });
 });
 
+/*
+test('Chrome-Chrome, H264', function (t) {
+  interop(t, 'chrome', 'chrome', '?vsc=H264&vrc=H264')
+  .then(function(info) {
+    t.ok(info.indexOf('H264') !== -1, 'H264 is used');
+    t.end();
+  });
+});
+
+test('Chrome-Firefox, H264', function (t) {
+  interop(t, 'chrome', 'firefox', '?vsc=H264&vrc=H264')
+  .then(function(info) {
+    t.ok(info.indexOf('H264') !== -1, 'H264 is used');
+    t.end();
+  });
+});
+*/
+
+/*
+test('Firefox-Chrome, H264', function (t) {
+  interop(t, 'firefox', 'chrome', '?vsc=H264&vrc=H264')
+  .then(function(info) {
+    t.end();
+  });
+});
+
 test('Chrome-Chrome, VP8', function (t) {
   interop(t, 'chrome', 'chrome', '?vsc=VP8&vrc=VP8')
   .then(function(info) {
-    t.pass(info.indexOf('VP8') !== -1, 'VP8 is used');
+    t.ok(info.indexOf('VP8') !== -1, 'VP8 is used');
     t.end();
   });
 });
@@ -182,6 +208,7 @@ test('Chrome-Chrome, VP9', function (t) {
     t.end();
   });
 });
+*/
 
 /*
 test('Firefox-Firefox, VP9', function (t) {
