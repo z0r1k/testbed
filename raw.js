@@ -5,11 +5,12 @@
  * SuperOp! 2016 event.
  */
 
+var os = require('os');
 var test = require('tape');
 var buildDriver = require('./webdriver');
 var WebRTCClient = require('./webrtcclient');
 
-function interop(t, browserA, browserB) {
+function interop(t, browserA, browserB, preferredAudioCodec) {
   var driverA = buildDriver(browserA);
   var driverB = buildDriver(browserB);
 
@@ -34,6 +35,27 @@ function interop(t, browserA, browserB) {
   })
   .then(function(offer) {
     t.pass('created offer');
+
+    if (preferredAudioCodec) {
+      var sections = SDPUtils.splitSections(offer.sdp);
+      var codecs = SDPUtils.parseRtpParameters(sections[1]).codecs;
+      var pt;
+      for (var i = 0; i < codecs.length; i++) {
+        if (codecs[i].name === preferredVideoCodec) {
+          pt = codecs[i].payloadType;
+          var lines = sections[1].split('\r\n');
+          mLine = lines.shift().split(' ');
+          mLine.splice(mLine.indexOf(pt.toString()), 1); // remove PT from current pos.
+          mLine.splice(3, 0, pt); // insert at first pos.
+          mLine = mLine.join(' ');
+          lines.unshift(mLine);
+          sections[1] = lines.join('\r\n');
+          offer.sdp = sections.join('');
+          break;
+        }
+      }
+      t.ok(pt !== undefined, 'preferred audio codec ' + preferredAudioCodec + ' with PT ' + pt);
+    }
     return clientA.setLocalDescription(offer); // modify offer here?
   })
   .then(function(offerWithCandidates) {
@@ -82,19 +104,19 @@ function interop(t, browserA, browserB) {
   });
 }
 
-test('Chrome-Edge', function (t) {
+test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function (t) {
   interop(t, 'chrome', 'MicrosoftEdge');
 });
 
-test('Edge-Chrome', function (t) {
+test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function (t) {
   interop(t, 'MicrosoftEdge', 'chrome');
 });
 
-test('Firefox-Edge', function (t) {
+test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function (t) {
   interop(t, 'firefox', 'MicrosoftEdge');
 });
 
-test('Edge-Firefox', function (t) {
+test('Edge-Firefox', {skip: os.platform() !== 'win32'}, function (t) {
   interop(t, 'MicrosoftEdge', 'firefox');
 });
 
