@@ -110,7 +110,7 @@ WebRTCClient.prototype.setRemoteDescription = function(desc) {
         document.body.appendChild(vid);
 
         if (event.stream.getVideoTracks().length) {
-          window.framechecker = new VideoFrameChecker(vid);
+          window.framechecker = new VideoFrameChecker(video);
           video.addEventListener('resize', function() {
             framechecker.checkVideoFrame_(); // start it
           });
