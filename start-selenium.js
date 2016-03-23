@@ -13,7 +13,8 @@ seleniumServer.install({
             console.error(err);
             return;
         }
-        require('./apprtc');
+        //require('./apprtc');
+        require('./raw');
 
         test('shutdown', function(t) {
             child.kill();
