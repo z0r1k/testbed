@@ -104,14 +104,14 @@ WebRTCClient.prototype.setRemoteDescription = function(desc) {
     var callback = arguments[arguments.length - 1];
 
     pc.onaddstream = function(event) {
-        var vid = document.createElement('video');
-        vid.autoplay = true;
-        vid.srcObject = event.stream;
+        var video = document.createElement('video');
+        video.autoplay = true;
+        video.srcObject = event.stream;
         document.body.appendChild(vid);
 
-        if (stream.getVideoTracks().length) {
+        if (event.stream.getVideoTracks().length) {
           window.framechecker = new VideoFrameChecker(vid);
-          vid.addEventListener('resize', function() {
+          video.addEventListener('resize', function() {
             framechecker.checkVideoFrame_(); // start it
           });
         }
