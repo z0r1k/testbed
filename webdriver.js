@@ -19,7 +19,7 @@ function buildDriver(browser, version, platform) {
 
   // Chrome options.
   var chromeOptions = new chrome.Options()
-      //.setChromeBinaryPath('/usr/bin/google-chrome-unstable')
+      //.setChromeBinaryPath('/usr/bin/google-chrome-beta')
       .addArguments('enable-features=WebRTC-H264WithOpenH264FFmpeg')
       .addArguments('allow-file-access-from-files')
       .addArguments('use-fake-device-for-media-stream')
