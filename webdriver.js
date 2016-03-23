@@ -9,7 +9,7 @@ function buildDriver(browser, version, platform) {
   profile.setPreference('media.navigator.streams.fake', true);
   profile.setPreference('media.navigator.permission.disabled', true);
   // note: interoperable with Chrome only in FF46+
-  profile.setPreference('media.peerconnection.video.vp9_enabled', true);
+  //profile.setPreference('media.peerconnection.video.vp9_enabled', true);
   profile.setPreference('xpinstall.signatures.required', false);
 
   profile.setPreference('media.gmp-gmpopenh264.version', '1.5.3'); // openh264
