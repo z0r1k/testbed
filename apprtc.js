@@ -107,6 +107,7 @@ function interop(t, browserA, browserB, queryString) {
     return driverA.findElement(webdriver.By.id('info-div')).getText();
   })
   .then(function(infotext) {
+    /*
     driverA.quit();
     // return a new promise so the test can .then and inspect
     // depending on the querystring.
@@ -114,9 +115,11 @@ function interop(t, browserA, browserB, queryString) {
     .then(function() {
       return Promise.resolve(infotext);
     });
+    */
   });
 }
 
+/*
 test('Chrome-Chrome', function (t) {
   //interop(t, 'chrome', 'MicrosoftEdge');
   interop(t, 'chrome', 'chrome')
@@ -168,7 +171,6 @@ test('Firefox-Firefox, H264', function (t) {
   });
 });
 
-/*
 test('Chrome-Chrome, H264', function (t) {
   interop(t, 'chrome', 'chrome', '?vsc=H264&vrc=H264')
   .then(function(info) {
@@ -176,6 +178,7 @@ test('Chrome-Chrome, H264', function (t) {
     t.end();
   });
 });
+*/
 
 test('Chrome-Firefox, H264', function (t) {
   interop(t, 'chrome', 'firefox', '?vsc=H264&vrc=H264')
@@ -184,7 +187,6 @@ test('Chrome-Firefox, H264', function (t) {
     t.end();
   });
 });
-*/
 
 /*
 test('Firefox-Chrome, H264', function (t) {
