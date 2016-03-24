@@ -14,7 +14,7 @@ seleniumServer.install({
             return;
         }
         //require('./apprtc');
-        require('./raw');
+        require('./video');
 
         test('shutdown', function(t) {
             child.kill();
