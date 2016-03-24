@@ -123,9 +123,12 @@ test('Chrome-Chrome, VP9', function(t) {
   video(t, 'chrome', 'chrome', 'VP9');
 });
 
+/* requires specific flag, currently deactivated since
+ * it breaks interop with chrome
 test('Firefox-Firefox, VP9', function(t) {
   video(t, 'firefox', 'firefox', 'VP9');
 });
+*/
 
 // H264 requires Chrome 50+ and a Firefox
 // profile pre-seeded with the right binary,
