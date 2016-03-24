@@ -41,11 +41,13 @@ H264 tests currently require Chrome 50 which adds H264 behind a flag.
 The tests for Microsoft Edge only run on Windows currently. Edge is not included in video 
 interoperability tests but will be once a version with interoperable H264 is released.
 
-###Firefox H264
+###Firefox 
 Firefox uses a binary module from the OpenH264 project to provide H264 support. Typically, this
 module is downloaded by Firefox shortly after the creation of a new profile. Since Selenium
 creates a new profile for each test, the binary needs to be provided in a template profile.
 See [this README](h264profile/gmp-gmpopenh264/1.5.3) for details.
+
+VP9 can be enabled with a flag in Firefox. However, this is compatbile with Chrome only in Firefox 45+.
 
 ##AppRTC tests
 apprtc.js shows how to test the [AppRTC](https://apprtc.appspot.com) example provided by Google.
