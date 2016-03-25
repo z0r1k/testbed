@@ -6,6 +6,8 @@ var firefox = require('selenium-webdriver/firefox');
 
 if (os.platform() === 'win32') {
   process.env.PATH += ';C:\\Program Files (x86)\\Microsoft Web Driver\\';
+  // FIXME: not sure why node_modules\.bin\ is not enough
+  process.env.PATH += ';' + process.cwd() + '\\node_modules\\chromedriver\\lib\\chromedriver\\';
 } else {
   process.env.PATH += ':node_modules/.bin';
 }
