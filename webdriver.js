@@ -1,6 +1,14 @@
+var os = require('os');
+
 var webdriver = require('selenium-webdriver');
 var chrome = require('selenium-webdriver/chrome');
 var firefox = require('selenium-webdriver/firefox');
+
+if (os.platform() === 'win32') {
+  process.env.PATH += ';C:\\Program Files (x86)\\Microsoft Web Driver\\';
+} else {
+  process.env.PATH += ':node_modules/.bin';
+}
 
 function buildDriver(browser, version, platform) {
   // Firefox options.
