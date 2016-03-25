@@ -59,6 +59,18 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   .then(function(offerWithCandidates) {
     t.pass('offer ready to signal');
 
+    // remove this to get a test failure.
+    /*
+    if (offerWithCandidates.sdp.indexOf('a=rtpmap:107 H264') !== -1) {
+        var sections = SDPUtils.splitSections(offerWithCandidates.sdp);
+        var lines = SDPUtils.splitLines(sections[2]);
+        var idx = lines.indexOf('a=rtpmap:107 H264/90000');
+        lines.splice(idx + 1, 0, 'a=fmtp:107 profile-level-id=42e01f;level-asymmetry-allowed=1');
+        sections[2] = lines.join('\r\n');
+        offerWithCandidates.sdp = sections.join('');
+    }
+    */
+
     clientB.create();
     return clientB.setRemoteDescription(offerWithCandidates);
   })
@@ -67,10 +79,17 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   })
   .then(function(answer) {
     t.pass('created answer');
+
     return clientB.setLocalDescription(answer); // modify answer here?
   })
   .then(function(answerWithCandidates) {
     t.pass('answer ready to signal');
+
+    if (preferredVideoCodec) {
+      var sections = SDPUtils.splitSections(answerWithCandidates.sdp);
+      var codecs = SDPUtils.parseRtpParameters(sections[2]).codecs;
+      t.ok(codecs[0].name === preferredVideoCodec, 'preferredVideoCodec is used');
+    }
     return clientA.setRemoteDescription(answerWithCandidates);
   })
   .then(function() {
@@ -103,6 +122,7 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   });
 }
 
+/*
 test('Chrome-Chrome, VP8', function(t) {
   video(t, 'chrome', 'chrome', 'VP8');
 });
@@ -122,6 +142,7 @@ test('Firefox-Chrome, VP8', function(t) {
 test('Chrome-Chrome, VP9', function(t) {
   video(t, 'chrome', 'chrome', 'VP9');
 });
+*/
 
 /* requires specific flag, currently deactivated since
  * it breaks interop with chrome
@@ -142,6 +163,7 @@ test('Chrome-Chrome, H264', function(t) {
 test('Firefox-Firefox, H264', function(t) {
   video(t, 'firefox', 'firefox', 'H264');
 });
+*/
 
 test('Chrome-Firefox, H264', function(t) {
   video(t, 'chrome', 'firefox', 'H264');
@@ -150,4 +172,3 @@ test('Chrome-Firefox, H264', function(t) {
 test('Firefox-Chrome, H264', function(t) {
   video(t, 'firefox', 'chrome', 'H264');
 });
-*/
