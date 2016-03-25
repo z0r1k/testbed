@@ -71,6 +71,13 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   })
   .then(function(answerWithCandidates) {
     t.pass('answer ready to signal');
+
+    if (preferredVideoCodec) {
+      var sections = SDPUtils.splitSections(answerWithCandidates.sdp);
+      var codecs = SDPUtils.parseRtpParameters(sections[2]).codecs;
+      t.ok(codecs[0].name === preferredVideoCodec, 'preferredVideoCodec is used');
+    }
+
     return clientA.setRemoteDescription(answerWithCandidates);
   })
   .then(function() {
