@@ -7,7 +7,7 @@
 
 var test = require('tape');
 var webdriver = require('selenium-webdriver');
-var buildDriver = require('./webdriver');
+var buildDriver = require('./webdriver').buildDriver;
 
 // Helper function for basic interop test.
 // see https://apprtc.appspot.com/params.html for queryString options (outdated...)
