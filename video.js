@@ -6,7 +6,7 @@
  */
 
 var test = require('tape');
-var buildDriver = require('./webdriver');
+var buildDriver = require('./webdriver').buildDriver;
 var WebRTCClient = require('./webrtcclient');
 var SDPUtils = require('webrtc-adapter/src/js/edge/edge_sdp');
 

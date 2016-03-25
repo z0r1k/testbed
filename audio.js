@@ -7,12 +7,13 @@
 
 var os = require('os');
 var test = require('tape');
-var buildDriver = require('./webdriver');
+var buildDriver = require('./webdriver').buildDriver;
+var startSelenium = require('./webdriver').startServer;
 var WebRTCClient = require('./webrtcclient');
 
 function interop(t, browserA, browserB, preferredAudioCodec) {
-  var driverA = buildDriver(browserA);
-  var driverB = buildDriver(browserB);
+  var driverA = buildDriver(browserA, {server: true});
+  var driverB = buildDriver(browserB, {server: true});
 
   var clientA = new WebRTCClient(driverA);
   var clientB = new WebRTCClient(driverB);
@@ -104,26 +105,39 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
   });
 }
 
-test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function (t) {
-  interop(t, 'chrome', 'MicrosoftEdge');
-});
+startSelenium()
+.then(function(server) {
+  // start of tests
+  test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+    interop(t, 'chrome', 'MicrosoftEdge');
+  });
 
-test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function (t) {
-  interop(t, 'MicrosoftEdge', 'chrome');
-});
+  test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function (t) {
+    interop(t, 'MicrosoftEdge', 'chrome');
+  });
 
-test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function (t) {
-  interop(t, 'firefox', 'MicrosoftEdge');
-});
+  test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+    interop(t, 'firefox', 'MicrosoftEdge');
+  });
 
-test('Edge-Firefox', {skip: os.platform() !== 'win32'}, function (t) {
-  interop(t, 'MicrosoftEdge', 'firefox');
-});
+  test('Edge-Firefox', {skip: os.platform() !== 'win32'}, function (t) {
+    interop(t, 'MicrosoftEdge', 'firefox');
+  });
 
-test('Chrome-Firefox', function (t) {
-  interop(t, 'chrome', 'firefox');
-});
+  test('Chrome-Firefox', function (t) {
+    interop(t, 'chrome', 'firefox');
+  });
 
-test('Firefox-Chrome', function (t) {
-  interop(t, 'firefox', 'chrome');
+  test('Firefox-Chrome', function (t) {
+    interop(t, 'firefox', 'chrome');
+  });
+
+  // must be the last 'test'. Shuts down the selenium server.
+  test('shutdown', function(t) {
+    server.kill();
+    t.end();
+  });
+})
+.catch(function(err) {
+  console.error(err);
 });

@@ -1,5 +1,7 @@
 var os = require('os');
 
+var seleniumServer = require('selenium-standalone');
+
 var webdriver = require('selenium-webdriver');
 var chrome = require('selenium-webdriver/chrome');
 var firefox = require('selenium-webdriver/firefox');
@@ -12,17 +14,25 @@ if (os.platform() === 'win32') {
   process.env.PATH += ':node_modules/.bin';
 }
 
-function buildDriver(browser, version, platform) {
+function buildDriver(browser, options) {
   // Firefox options.
   // contains gmp-gmpopenh264/1.5.3 which may contain openh264 binary.
-  var profile = new firefox.Profile('h264profile');
+  var profile;
+  options = options || {};
+  if (options.h264) {
+    profile = new firefox.Profile('h264profile');
+    profile.setPreference('media.gmp-gmpopenh264.version', '1.5.3'); // openh264
+  } else {
+    profile = new firefox.Profile();
+  }
+  // note: interoperable with Chrome only in FF46+
+  if (options.vp9) {
+    profile.setPreference('media.peerconnection.video.vp9_enabled', true);
+  }
+
   profile.setPreference('media.navigator.streams.fake', true);
   profile.setPreference('media.navigator.permission.disabled', true);
-  // note: interoperable with Chrome only in FF46+
-  //profile.setPreference('media.peerconnection.video.vp9_enabled', true);
   profile.setPreference('xpinstall.signatures.required', false);
-
-  profile.setPreference('media.gmp-gmpopenh264.version', '1.5.3'); // openh264
 
   var firefoxOptions = new firefox.Options()
       .setProfile(profile);
@@ -41,8 +51,12 @@ function buildDriver(browser, version, platform) {
   var driver = new webdriver.Builder()
       .setFirefoxOptions(firefoxOptions)
       .setChromeOptions(chromeOptions)
-      .forBrowser(browser, version, platform)
-      .build();
+      .forBrowser(browser);
+  if (options.server) {
+    driver = driver.usingServer('http://localhost:4444/wd/hub/');
+  };
+  driver = driver.build();
+
   // Set global executeAsyncScript() timeout (default is 0) to allow async
   // callbacks to be caught in tests.
   driver.manage().timeouts().setScriptTimeout(5 * 1000);
@@ -50,4 +64,27 @@ function buildDriver(browser, version, platform) {
   return driver;
 }
 
-module.exports = buildDriver;
+function startServer() {
+  return new Promise(function(resolve, reject) {
+    seleniumServer.install({
+      drivers: {
+        chrome: {},
+        firefox: {},
+        ie: false
+      }
+    }, function(err, cb) {
+      seleniumServer.start(function (err, child) {
+        if (err) {
+          reject(err); 
+          return;
+        }
+        return resolve(child);
+      });
+    });
+  });
+}
+
+module.exports = {
+  buildDriver: buildDriver,
+  startServer: startServer
+}
