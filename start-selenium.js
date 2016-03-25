@@ -1,3 +1,4 @@
+// currently unused due to problems with pre-seeded firefox profiles.
 var seleniumServer = require('selenium-standalone');
 var test = require('tape');
 

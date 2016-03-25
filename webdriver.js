@@ -4,8 +4,8 @@ var firefox = require('selenium-webdriver/firefox');
 
 function buildDriver(browser, version, platform) {
   // Firefox options.
-  //var profile = new firefox.Profile('h264profile'); // contains gmp-gmpopenh264/1.5.3
-  var profile = new firefox.Profile();
+  // contains gmp-gmpopenh264/1.5.3 which may contain openh264 binary.
+  var profile = new firefox.Profile('h264profile');
   profile.setPreference('media.navigator.streams.fake', true);
   profile.setPreference('media.navigator.permission.disabled', true);
   // note: interoperable with Chrome only in FF46+
@@ -29,7 +29,6 @@ function buildDriver(browser, version, platform) {
       .addArguments('mute-audio');
 
   var driver = new webdriver.Builder()
-      .usingServer('http://localhost:4444/wd/hub')
       .setFirefoxOptions(firefoxOptions)
       .setChromeOptions(chromeOptions)
       .forBrowser(browser, version, platform)
