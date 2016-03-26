@@ -5,6 +5,7 @@ var seleniumServer = require('selenium-standalone');
 var webdriver = require('selenium-webdriver');
 var chrome = require('selenium-webdriver/chrome');
 var firefox = require('selenium-webdriver/firefox');
+var edge = require('selenium-webdriver/edge');
 
 if (os.platform() === 'win32') {
   process.env.PATH += ';C:\\Program Files (x86)\\Microsoft Web Driver\\';
@@ -48,9 +49,12 @@ function buildDriver(browser, options) {
       .addArguments('no-process-singleton-dialog')
       .addArguments('mute-audio');
 
+  var edgeOptions = new edge.Options();
+
   var driver = new webdriver.Builder()
       .setFirefoxOptions(firefoxOptions)
       .setChromeOptions(chromeOptions)
+      .setEdgeOptions(edgeOptions)
       .forBrowser(browser);
   if (options.server) {
     driver = driver.usingServer('http://localhost:4444/wd/hub/');
