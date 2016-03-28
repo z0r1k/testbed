@@ -5,6 +5,7 @@
  * SuperOp! 2016 event.
  */
 
+var os = require('os');
 var test = require('tape');
 var buildDriver = require('./webdriver').buildDriver;
 var WebRTCClient = require('./webrtcclient');
@@ -156,5 +157,11 @@ test('Chrome-Firefox, H264', function(t) {
 
 test('Firefox-Chrome, H264', function(t) {
   video(t, 'firefox', 'chrome', 'H264');
+});
+*/
+
+/*
+test('Edge-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'MicrosoftEdge', 'MicrosoftEdge');
 });
 */
