@@ -1,7 +1,7 @@
-/* webrtc interop testing using using selenium 
+/* webrtc interop testing using using selenium
  * Copyright (c) 2016, Philipp Hancke
  * This work has been sponsored by the International Multimedia
- * Teleconferencing Consortium in preparation for the 
+ * Teleconferencing Consortium in preparation for the
  * SuperOp! 2016 event.
  */
 
@@ -20,7 +20,7 @@ function video(t, browserA, browserB, preferredVideoCodec) {
 
   driverA.get('https://fippo.github.io/adapter/testpage.html')
   .then(function() {
-    return driverB.get('https://fippo.github.io/adapter/testpage.html')
+    return driverB.get('https://fippo.github.io/adapter/testpage.html');
   })
   .then(function() {
     clientA.create();
@@ -44,7 +44,8 @@ function video(t, browserA, browserB, preferredVideoCodec) {
         pt = codecs[i].payloadType;
         var lines = sections[2].split('\r\n');
         mLine = lines.shift().split(' ');
-        mLine.splice(mLine.indexOf(pt.toString()), 1); // remove PT from current pos.
+        // remove PT from current pos.
+        mLine.splice(mLine.indexOf(pt.toString()), 1);
         mLine.splice(3, 0, pt); // insert at first pos.
         mLine = mLine.join(' ');
         lines.unshift(mLine);
@@ -53,7 +54,8 @@ function video(t, browserA, browserB, preferredVideoCodec) {
         break;
       }
     }
-    t.ok(pt !== undefined, 'preferred video codec ' + preferredVideoCodec + ' with PT ' + pt);
+    t.ok(pt !== undefined, 'preferred video codec ' + preferredVideoCodec +
+        ' with PT ' + pt);
 
     return clientA.setLocalDescription(offer);
   })
@@ -76,7 +78,8 @@ function video(t, browserA, browserB, preferredVideoCodec) {
     if (preferredVideoCodec) {
       var sections = SDPUtils.splitSections(answerWithCandidates.sdp);
       var codecs = SDPUtils.parseRtpParameters(sections[2]).codecs;
-      t.ok(codecs[0].name === preferredVideoCodec, 'preferredVideoCodec is used');
+      t.ok(codecs[0].name === preferredVideoCodec,
+          'preferredVideoCodec is used');
     }
 
     return clientA.setRemoteDescription(answerWithCandidates);

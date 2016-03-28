@@ -1,7 +1,7 @@
-/* webrtc interop testing using using selenium 
+/* webrtc interop testing using using selenium
  * Copyright (c) 2016, Philipp Hancke
  * This work has been sponsored by the International Multimedia
- * Teleconferencing Consortium in preparation for the 
+ * Teleconferencing Consortium in preparation for the
  * SuperOp! 2016 event.
  */
 
@@ -28,18 +28,22 @@ function mangle(sdp) {
       parts.shift();
       mediaSections[i] += 'a=' + parts.join(' ') + '\r\n';
     } else if (specMsid.length > 0 && cnames.length && !chromeMsid.length) {
-      mediaSections[i] += cnames[0].split(' ', 1)[0] + ' ' + specMsid[0].substr(2) + '\r\n';
+      mediaSections[i] += cnames[0].split(' ', 1)[0] + ' ' +
+          specMsid[0].substr(2) + '\r\n';
     }
   }
   return mediaSections.join('');
 }
 
-// we use addStream twice and pretend to be a single stream to work around FF bugs.
+// we use addStream twice and pretend to be a single stream to
+// work around FF bugs.
 function replaceSecondStreamId(sdp) {
   var mediaSections = SDPUtils.splitSections(sdp);
 
-  var firstMsid = SDPUtils.matchPrefix(mediaSections[1], 'a=msid:')[0].split(' ')[0].substr(7);
-  var secondMsid = SDPUtils.matchPrefix(mediaSections[2], 'a=msid:')[0].split(' ')[0].substr(7);
+  var firstMsid = SDPUtils.matchPrefix(mediaSections[1], 'a=msid:')[0]
+      .split(' ')[0].substr(7);
+  var secondMsid = SDPUtils.matchPrefix(mediaSections[2], 'a=msid:')[0]
+      .split(' ')[0].substr(7);
 
   return sdp.replace(new RegExp(secondMsid, 'g'), firstMsid);
 }
@@ -53,7 +57,7 @@ function upgrade(t, browserA, browserB) {
 
   driverA.get('https://fippo.github.io/adapter/testpage.html')
   .then(function() {
-    return driverB.get('https://fippo.github.io/adapter/testpage.html')
+    return driverB.get('https://fippo.github.io/adapter/testpage.html');
   })
   .then(function() {
     clientA.create();
@@ -158,18 +162,18 @@ function upgrade(t, browserA, browserB) {
   });
 }
 
-test('Chrome-Chrome', function (t) {
+test('Chrome-Chrome', function(t) {
   upgrade(t, 'chrome', 'chrome');
 });
 
-test('Firefox-Firefox', function (t) {
+test('Firefox-Firefox', function(t) {
   upgrade(t, 'firefox', 'firefox');
 });
 
-test('Chrome-Firefox', function (t) {
+test('Chrome-Firefox', function(t) {
   upgrade(t, 'chrome', 'firefox');
 });
 
-test('Firefox-Chrome', function (t) {
+test('Firefox-Chrome', function(t) {
   upgrade(t, 'firefox', 'chrome');
 });

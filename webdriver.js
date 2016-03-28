@@ -10,7 +10,8 @@ var edge = require('selenium-webdriver/edge');
 if (os.platform() === 'win32') {
   process.env.PATH += ';C:\\Program Files (x86)\\Microsoft Web Driver\\';
   // FIXME: not sure why node_modules\.bin\ is not enough
-  process.env.PATH += ';' + process.cwd() + '\\node_modules\\chromedriver\\lib\\chromedriver\\';
+  process.env.PATH += ';' + process.cwd() +
+      '\\node_modules\\chromedriver\\lib\\chromedriver\\';
 } else {
   process.env.PATH += ':node_modules/.bin';
 }
@@ -40,7 +41,7 @@ function buildDriver(browser, options) {
 
   // Chrome options.
   var chromeOptions = new chrome.Options()
-      //.setChromeBinaryPath('/usr/bin/google-chrome-beta')
+      // .setChromeBinaryPath('/usr/bin/google-chrome-beta')
       .addArguments('enable-features=WebRTC-H264WithOpenH264FFmpeg')
       .addArguments('allow-file-access-from-files')
       .addArguments('use-fake-device-for-media-stream')
@@ -58,7 +59,7 @@ function buildDriver(browser, options) {
       .forBrowser(browser);
   if (options.server) {
     driver = driver.usingServer('http://localhost:4444/wd/hub/');
-  };
+  }
   driver = driver.build();
 
   // Set global executeAsyncScript() timeout (default is 0) to allow async
@@ -77,9 +78,9 @@ function startServer() {
         ie: false
       }
     }, function(err, cb) {
-      seleniumServer.start(function (err, child) {
+      seleniumServer.start(function(err, child) {
         if (err) {
-          reject(err); 
+          reject(err);
           return;
         }
         return resolve(child);
@@ -91,4 +92,4 @@ function startServer() {
 module.exports = {
   buildDriver: buildDriver,
   startServer: startServer
-}
+};

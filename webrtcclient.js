@@ -1,7 +1,7 @@
-/* Interop testing using apprtc.appspot.com using selenium 
+/* Interop testing using apprtc.appspot.com using selenium
  * Copyright (c) 2016, Philipp Hancke
  * This work has been sponsored by the International Multimedia
- * Teleconferencing Consortium in preparation for the 
+ * Teleconferencing Consortium in preparation for the
  * SuperOp! 2016 event.
  */
 
@@ -75,7 +75,7 @@ WebRTCClient.prototype.setLocalDescription = function(desc) {
         var desc = {
           type: pc.localDescription.type,
           sdp: pc.localDescription.sdp
-        }
+        };
         if (desc.sdp.indexOf('\r\na=end-of-candidates\r\n') === -1) {
           var parts = desc.sdp.split('\r\nm=').map(function(part, index) {
             return (index > 0 ? 'm=' + part : part).trim() + '\r\n';
@@ -104,17 +104,17 @@ WebRTCClient.prototype.setRemoteDescription = function(desc) {
     var callback = arguments[arguments.length - 1];
 
     pc.onaddstream = function(event) {
-        var video = document.createElement('video');
-        video.autoplay = true;
-        video.srcObject = event.stream;
-        document.body.appendChild(video);
+      var video = document.createElement('video');
+      video.autoplay = true;
+      video.srcObject = event.stream;
+      document.body.appendChild(video);
 
-        if (event.stream.getVideoTracks().length) {
-          window.framechecker = new VideoFrameChecker(video);
-          video.addEventListener('resize', function() {
-            framechecker.checkVideoFrame_(); // start it
-          });
-        }
+      if (event.stream.getVideoTracks().length) {
+        window.framechecker = new VideoFrameChecker(video);
+        video.addEventListener('resize', function() {
+          framechecker.checkVideoFrame_(); // start it
+        });
+      }
     };
     pc.setRemoteDescription(new RTCSessionDescription(desc))
     .then(function() {
@@ -132,7 +132,8 @@ WebRTCClient.prototype.waitForIceConnectionStateChange = function() {
 
     var isConnectedOrFailed = function() {
       var state = pc.iceConnectionState;
-      if (state === 'connected' || state === 'completed' || state === 'failed') {
+      if (state === 'connected' || state === 'completed' ||
+          state === 'failed') {
         callback(state);
         return true;
       }

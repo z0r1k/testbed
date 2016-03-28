@@ -21,7 +21,7 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
   // static page with adapter shim
   driverA.get('https://fippo.github.io/adapter/testpage.html')
   .then(function() {
-    return driverB.get('https://fippo.github.io/adapter/testpage.html')
+    return driverB.get('https://fippo.github.io/adapter/testpage.html');
   })
   .then(function() {
     clientA.create();
@@ -42,11 +42,12 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
       var codecs = SDPUtils.parseRtpParameters(sections[1]).codecs;
       var pt;
       for (var i = 0; i < codecs.length; i++) {
-        if (codecs[i].name === preferredVideoCodec) {
+        if (codecs[i].name === preferredAudioCodec) {
           pt = codecs[i].payloadType;
           var lines = sections[1].split('\r\n');
           mLine = lines.shift().split(' ');
-          mLine.splice(mLine.indexOf(pt.toString()), 1); // remove PT from current pos.
+          // remove PT from current pos.
+          mLine.splice(mLine.indexOf(pt.toString()), 1);
           mLine.splice(3, 0, pt); // insert at first pos.
           mLine = mLine.join(' ');
           lines.unshift(mLine);
@@ -55,7 +56,8 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
           break;
         }
       }
-      t.ok(pt !== undefined, 'preferred audio codec ' + preferredAudioCodec + ' with PT ' + pt);
+      t.ok(pt !== undefined, 'preferred audio codec ' + preferredAudioCodec +
+          ' with PT ' + pt);
     }
     return clientA.setLocalDescription(offer); // modify offer here?
   })
@@ -108,27 +110,27 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
 startSelenium()
 .then(function(server) {
   // start of tests
-  test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+  test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function(t) {
     interop(t, 'chrome', 'MicrosoftEdge');
   });
 
-  test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function (t) {
+  test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function(t) {
     interop(t, 'MicrosoftEdge', 'chrome');
   });
 
-  test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+  test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function(t) {
     interop(t, 'firefox', 'MicrosoftEdge');
   });
 
-  test('Edge-Firefox', {skip: os.platform() !== 'win32'}, function (t) {
+  test('Edge-Firefox', {skip: os.platform() !== 'win32'}, function(t) {
     interop(t, 'MicrosoftEdge', 'firefox');
   });
 
-  test('Chrome-Firefox', function (t) {
+  test('Chrome-Firefox', function(t) {
     interop(t, 'chrome', 'firefox');
   });
 
-  test('Firefox-Chrome', function (t) {
+  test('Firefox-Chrome', function(t) {
     interop(t, 'firefox', 'chrome');
   });
 

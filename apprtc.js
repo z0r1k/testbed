@@ -1,7 +1,7 @@
-/* Interop testing using apprtc.appspot.com using selenium 
+/* Interop testing using apprtc.appspot.com using selenium
  * Copyright (c) 2016, Philipp Hancke
  * This work has been sponsored by the International Multimedia
- * Teleconferencing Consortium in preparation for the 
+ * Teleconferencing Consortium in preparation for the
  * SuperOp! 2016 event.
  */
 
@@ -15,12 +15,8 @@ function interop(t, browserA, browserB, queryString) {
   var driverA = buildDriver(browserA);
   var driverB;
 
-  //var baseURL = 'https://10.apprtc.appspot.com/';
   var baseURL = 'https://apprtc.appspot.com/';
-  //var qs = '?audio=true&video=false';
-  //var qs = '?it=relay';
 
-  var info;
   return driverA.get(baseURL + (queryString || ''))
   .then(function() {
     t.pass('page loaded');
@@ -37,7 +33,7 @@ function interop(t, browserA, browserB, queryString) {
   })
   .then(function() {
     t.pass('joined room');
-    return driverA.getCurrentUrl()
+    return driverA.getCurrentUrl();
   })
   .then(function(url) {
     //
@@ -59,17 +55,19 @@ function interop(t, browserA, browserB, queryString) {
       var callback = arguments[arguments.length - 1];
       var isConnectedOrFailed = function() {
         var state = appController.call_.pcClient_.pc_.iceConnectionState;
-        if (state === 'connected' || state === 'completed' || state === 'failed') {
+        if (state === 'connected' || state === 'completed'
+            || state === 'failed') {
           callback(state);
         }
       };
-      appController.call_.pcClient_.pc_.addEventListener('iceconnectionstatechange',
-          isConnectedOrFailed);
+      appController.call_.pcClient_.pc_
+          .addEventListener('iceconnectionstatechange', isConnectedOrFailed);
+      isConnectedOrFailed();
     });
-    isConnectedOrFailed();
   })
   .then(function(iceConnectionState) {
-    t.ok(iceConnectionState === 'connected' || iceConnectionState === 'completed',
+    t.ok(iceConnectionState === 'connected' ||
+        iceConnectionState === 'completed',
         'ice connection state is connected or completed');
   })
   .then(function() {
@@ -77,21 +75,23 @@ function interop(t, browserA, browserB, queryString) {
     return new Promise(function(resolve, reject) {
       var bundle = require('browserify')({standalone: 'VideoFrameChecker'});
       bundle.add('./videoframechecker');
-      bundle.bundle(function (err, source) {
+      bundle.bundle(function(err, source) {
         if (err) {
           reject(err);
         } else {
           resolve(source);
         }
       });
-    })
+    });
   })
   .then(function(framecheckersource) {
     driverA.executeScript(framecheckersource.toString());
-    driverA.sleep(1000); // avoid timing issues on high latency (relayed) connections.
+    // avoid timing issues on high latency (relayed) connections.
+    driverA.sleep(1000);
     return driverA.executeAsyncScript(function() {
       var callback = arguments[arguments.length - 1];
-      var framechecker = new VideoFrameChecker(document.getElementById('remote-video'));
+      var framechecker = new VideoFrameChecker(
+          document.getElementById('remote-video'));
       framechecker.checkVideoFrame_(); // start it
       window.setTimeout(function() {
         framechecker.stop();
@@ -117,51 +117,52 @@ function interop(t, browserA, browserB, queryString) {
   });
 }
 
-test('Chrome-Chrome', function (t) {
-  //interop(t, 'chrome', 'MicrosoftEdge');
+test('Chrome-Chrome', function(t) {
   interop(t, 'chrome', 'chrome')
   .then(function(info) {
     t.end();
   });
 });
 
-test('Chrome-Firefox', function (t) {
+test('Chrome-Firefox', function(t) {
   interop(t, 'chrome', 'firefox')
   .then(function(info) {
     t.end();
   });
 });
 
-test('Firefox-Chrome', function (t) {
+test('Firefox-Chrome', function(t) {
   interop(t, 'firefox', 'chrome')
   .then(function(info) {
     t.end();
   });
 });
 
-test('Firefox-Firefox', function (t) {
+test('Firefox-Firefox', function(t) {
   interop(t, 'firefox', 'firefox')
   .then(function(info) {
     t.end();
   });
 });
 
-//unclear how to evaluate audio-only
-//test('Chrome-Chrome, audio-only', function (t) {
-//  interop(t, 'chrome', 'chrome', '?audio=true&video=false')
-//  .then(function(info) {
-//    t.end();
-//  });
-//});
+// unclear how to evaluate audio-only
+/*
+test('Chrome-Chrome, audio-only', function(t) {
+  interop(t, 'chrome', 'chrome', '?audio=true&video=false')
+  .then(function(info) {
+    t.end();
+  });
+});
+*/
 
-test('Chrome-Chrome, icetransports=relay', function (t) {
+test('Chrome-Chrome, icetransports=relay', function(t) {
   interop(t, 'chrome', 'chrome', '?it=relay')
   .then(function(info) {
     t.end();
   });
 });
 
-test('Firefox-Firefox, H264', function (t) {
+test('Firefox-Firefox, H264', function(t) {
   interop(t, 'firefox', 'firefox', '?vsc=H264&vrc=H264')
   .then(function(info) {
     t.end();
@@ -169,7 +170,7 @@ test('Firefox-Firefox, H264', function (t) {
 });
 
 /*
-test('Chrome-Chrome, H264', function (t) {
+test('Chrome-Chrome, H264', function(t) {
   interop(t, 'chrome', 'chrome', '?vsc=H264&vrc=H264')
   .then(function(info) {
     t.ok(info.indexOf('H264') !== -1, 'H264 is used');
@@ -177,7 +178,7 @@ test('Chrome-Chrome, H264', function (t) {
   });
 });
 
-test('Chrome-Firefox, H264', function (t) {
+test('Chrome-Firefox, H264', function(t) {
   interop(t, 'chrome', 'firefox', '?vsc=H264&vrc=H264')
   .then(function(info) {
     t.ok(info.indexOf('H264') !== -1, 'H264 is used');
@@ -187,14 +188,14 @@ test('Chrome-Firefox, H264', function (t) {
 */
 
 /*
-test('Firefox-Chrome, H264', function (t) {
+test('Firefox-Chrome, H264', function(t) {
   interop(t, 'firefox', 'chrome', '?vsc=H264&vrc=H264')
   .then(function(info) {
     t.end();
   });
 });
 
-test('Chrome-Chrome, VP8', function (t) {
+test('Chrome-Chrome, VP8', function(t) {
   interop(t, 'chrome', 'chrome', '?vsc=VP8&vrc=VP8')
   .then(function(info) {
     t.ok(info.indexOf('VP8') !== -1, 'VP8 is used');
@@ -202,7 +203,7 @@ test('Chrome-Chrome, VP8', function (t) {
   });
 });
 
-test('Chrome-Chrome, VP9', function (t) {
+test('Chrome-Chrome, VP9', function(t) {
   interop(t, 'chrome', 'chrome', '?vsc=VP9&vrc=VP9')
   .then(function(info) {
     t.end();
@@ -211,7 +212,7 @@ test('Chrome-Chrome, VP9', function (t) {
 */
 
 /*
-test('Firefox-Firefox, VP9', function (t) {
+test('Firefox-Firefox, VP9', function(t) {
   interop(t, 'firefox', 'firefox', '?vsc=VP9&vrc=VP9')
   .then(function(info) {
     t.end();
