@@ -41,6 +41,9 @@ H264 tests currently require Chrome 50 which adds H264 behind a flag.
 The tests for Microsoft Edge only run on Windows currently. Edge is not included in video 
 interoperability tests but will be once a version with interoperable H264 is released.
 
+The Insider Edge Webdriver version 14279 seems to work a lot better without selenium server than
+the 10586 version.
+
 ###Firefox 
 Firefox uses a binary module from the OpenH264 project to provide H264 support. Typically, this
 module is downloaded by Firefox shortly after the creation of a new profile. Since Selenium
