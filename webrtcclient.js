@@ -36,6 +36,12 @@ WebRTCClient.prototype.addStream = function() {
   });
 };
 
+WebRTCClient.prototype.createDataChannel = function(label, dict) {
+  return this.driver.executeScript(function(label, dict) {
+    pc.createDataChannel(label, dict);
+  }, label, dict);
+}
+
 WebRTCClient.prototype.createOffer = function() {
   return this.driver.executeAsyncScript(function() {
     var callback = arguments[arguments.length - 1];
