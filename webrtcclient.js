@@ -132,6 +132,13 @@ WebRTCClient.prototype.setRemoteDescription = function(desc) {
   }, desc);
 };
 
+WebRTCClient.prototype.close = function() {
+  this.driver.executeScript(function(pcConfig) {
+    window.pc.close();
+    delete window.pc;
+  });
+};
+
 WebRTCClient.prototype.waitForIceConnectionStateChange = function() {
   return this.driver.executeAsyncScript(function() {
     var callback = arguments[arguments.length - 1];
