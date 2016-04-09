@@ -241,12 +241,14 @@ function transfer(t, browserA, browserB, browserC) {
     t.ok(frameStats.numFrames > 0, 'video frames received');
   })
   .then(function() {
+    /*
     driverA.quit();
     driverB.quit()
     driverC.quit()
     .then(function() {
       t.end();
     });
+    */
   })
   .catch(function(err) {
     t.fail(err);
@@ -255,9 +257,11 @@ function transfer(t, browserA, browserB, browserC) {
 startSelenium()
 .then(function(server) {
   // start of tests
+  /*
   test('Restart Chrome-Chrome', function(t) {
     icerestart(t, 'chrome', 'chrome');
   });
+  */
 
   test('Transfer Chrome-Chrome-Chrome', function(t) {
     transfer(t, 'chrome', 'chrome', 'chrome');

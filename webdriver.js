@@ -41,7 +41,7 @@ function buildDriver(browser, options) {
 
   // Chrome options.
   var chromeOptions = new chrome.Options()
-      // .setChromeBinaryPath('/usr/bin/google-chrome-beta')
+      .setChromeBinaryPath('/usr/bin/google-chrome-beta')
       .addArguments('enable-features=WebRTC-H264WithOpenH264FFmpeg')
       .addArguments('allow-file-access-from-files')
       .addArguments('use-fake-device-for-media-stream')
@@ -64,7 +64,7 @@ function buildDriver(browser, options) {
 
   // Set global executeAsyncScript() timeout (default is 0) to allow async
   // callbacks to be caught in tests.
-  driver.manage().timeouts().setScriptTimeout(5 * 1000);
+  driver.manage().timeouts().setScriptTimeout(10 * 1000);
 
   return driver;
 }
