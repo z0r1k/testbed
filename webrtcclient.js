@@ -9,10 +9,49 @@ function WebRTCClient(driver) {
   this.driver = driver;
 }
 
-WebRTCClient.prototype.create = function(pcConfig) {
+WebRTCClient.prototype.create = function(pcConfig, keygenAlgorithm) {
+  // TODO: brutal hack
+  if (keygenAlgorithm) {
+    return this.driver.executeAsyncScript(function(pcConfig, keygenAlgorithm) {
+      var callback = arguments[arguments.length - 1];
+
+      if (RTCPeerConnection.generateCertificate) {
+        RTCPeerConnection.generateCertificate(keygenAlgorithm)
+        .then(function(cert) {
+          if (!pcConfig) {
+            pcConfig = {
+              iceServers: []
+            };
+          }
+          pcConfig.certificates = [cert];
+          window.pc = new RTCPeerConnection(pcConfig);
+          callback();
+        })
+        .catch(function(err) {
+          callback(err);
+        });
+      } else {
+        window.pc = new RTCPeerConnection(pcConfig);
+        callback();
+      }
+    }, pcConfig, keygenAlgorithm);
+  }
   this.driver.executeScript(function(pcConfig) {
     window.pc = new RTCPeerConnection(pcConfig);
   }, pcConfig);
+};
+
+WebRTCClient.prototype.generateCertificate = function(keygenAlgorithm) {
+  return this.driver.executeAsyncScript(function(keygenAlgorithm) {
+    var callback = arguments[arguments.length - 1];
+    RTCPeerConnection.generateCertificate(keygenAlgorithm)
+    .then(function(cert) {
+      callback(cert);
+    })
+    .catch(function(err) {
+      callback(err);
+    });
+  }, keygenAlgorithm);
 };
 
 WebRTCClient.prototype.getUserMedia = function(constraints) {
