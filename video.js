@@ -62,6 +62,17 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   .then(function(offerWithCandidates) {
     t.pass('offer ready to signal');
 
+    // this was fixed into Chrome 51 with https://bugs.chromium.org/p/chromium/issues/detail?id=591971
+    if (offerWithCandidates.sdp.indexOf('a=rtpmap:107 H264') !== -1 &&
+        offerWithCandidates.sdp.indexOf('a=fmtp:107') === -1) {
+      var sections = SDPUtils.splitSections(offerWithCandidates.sdp);
+      var lines = SDPUtils.splitLines(sections[2]);
+      var idx = lines.indexOf('a=rtpmap:107 H264/90000');
+      lines.splice(idx + 1, 0, 'a=fmtp:107 profile-level-id=42e01f;level-asymmetry-allowed=1');
+      sections[2] = lines.join('\r\n');
+      offerWithCandidates.sdp = sections.join('') + '\r\n';
+    }
+
     clientB.create();
     return clientB.setRemoteDescription(offerWithCandidates);
   })
@@ -78,8 +89,7 @@ function video(t, browserA, browserB, preferredVideoCodec) {
     if (preferredVideoCodec) {
       var sections = SDPUtils.splitSections(answerWithCandidates.sdp);
       var codecs = SDPUtils.parseRtpParameters(sections[2]).codecs;
-      t.ok(codecs[0].name === preferredVideoCodec,
-          'preferredVideoCodec is used');
+      t.ok(codecs[0].name === preferredVideoCodec, 'preferredVideoCodec is used');
     }
 
     return clientA.setRemoteDescription(answerWithCandidates);
