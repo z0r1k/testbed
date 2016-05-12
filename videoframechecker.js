@@ -152,4 +152,4 @@ VideoFrameChecker.prototype = {
   }
 };
 
-module.exports = VideoFrameChecker;
+window.VideoFrameChecker = VideoFrameChecker;

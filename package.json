@@ -6,6 +6,7 @@
   "dependencies": {
     "browserify": "^13.0.0",
     "chromedriver": "^2.21.2",
+    "sdp": "^1.0.0",
     "selenium-standalone": "^5.1.0",
     "selenium-webdriver": "^2.52.0",
     "tape": "^4.5.1",

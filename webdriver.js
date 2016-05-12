@@ -1,4 +1,5 @@
 var os = require('os');
+var fs = require('fs');
 
 var seleniumServer = require('selenium-standalone');
 
@@ -69,6 +70,14 @@ function buildDriver(browser, options) {
   return driver;
 }
 
+// static page that includes adapter.js 
+function getTestpage(driver) {
+    return driver.get('https://fippo.github.io/adapter/testpage.html')
+    .then(function() {
+        return driver.executeScript(fs.readFileSync('videoframechecker.js').toString());
+    });
+}
+
 function startServer() {
   return new Promise(function(resolve, reject) {
     seleniumServer.install({
@@ -91,5 +100,6 @@ function startServer() {
 
 module.exports = {
   buildDriver: buildDriver,
+  getTestpage: getTestpage,
   startServer: startServer
 };

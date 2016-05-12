@@ -8,8 +8,9 @@
 var os = require('os');
 var test = require('tape');
 var buildDriver = require('./webdriver').buildDriver;
+var getTestpage = require('./webdriver').getTestpage;
 var WebRTCClient = require('./webrtcclient');
-var SDPUtils = require('webrtc-adapter/src/js/edge/edge_sdp');
+var SDPUtils = require('sdp');
 
 function video(t, browserA, browserB, preferredVideoCodec) {
   var driverA = buildDriver(browserA);
@@ -18,9 +19,9 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   var clientA = new WebRTCClient(driverA);
   var clientB = new WebRTCClient(driverB);
 
-  driverA.get('https://fippo.github.io/adapter/testpage.html')
+  getTestpage(driverA)
   .then(function() {
-    return driverB.get('https://fippo.github.io/adapter/testpage.html');
+    return getTestpage(driverB);
   })
   .then(function() {
     clientA.create();

@@ -9,6 +9,7 @@ var os = require('os');
 var test = require('tape');
 var buildDriver = require('./webdriver').buildDriver;
 var startSelenium = require('./webdriver').startServer;
+var getTestpage = require('./webdriver').getTestpage;
 var WebRTCClient = require('./webrtcclient');
 
 function interop(t, browserA, browserB, preferredAudioCodec) {
@@ -18,10 +19,9 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
   var clientA = new WebRTCClient(driverA);
   var clientB = new WebRTCClient(driverB);
 
-  // static page with adapter shim
-  driverA.get('https://fippo.github.io/adapter/testpage.html')
+  getTestpage(driverA)
   .then(function() {
-    return driverB.get('https://fippo.github.io/adapter/testpage.html');
+    return getTestpage(driverB);
   })
   .then(function() {
     clientA.create();

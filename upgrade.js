@@ -7,8 +7,9 @@
 
 var test = require('tape');
 var buildDriver = require('./webdriver').buildDriver;
+var getTestpage = require('./webdriver').getTestpage;
 var WebRTCClient = require('./webrtcclient');
-var SDPUtils = require('webrtc-adapter/src/js/edge/edge_sdp');
+var SDPUtils = require('sdp');
 
 // add MSIDs the other party understands.
 function mangle(sdp) {
@@ -55,9 +56,9 @@ function upgrade(t, browserA, browserB) {
   var clientA = new WebRTCClient(driverA);
   var clientB = new WebRTCClient(driverB);
 
-  driverA.get('https://fippo.github.io/adapter/testpage.html')
+  getTestpage(driverA)
   .then(function() {
-    return driverB.get('https://fippo.github.io/adapter/testpage.html');
+    return getTestpage(driverB);
   })
   .then(function() {
     clientA.create();
