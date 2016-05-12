@@ -22,16 +22,11 @@ function buildDriver(browser, options) {
   // contains gmp-gmpopenh264/1.5.3 which may contain openh264 binary.
   var profile;
   options = options || {};
-  if (options.h264) {
-    profile = new firefox.Profile('h264profile');
-    profile.setPreference('media.gmp-gmpopenh264.version', '1.5.3'); // openh264
-  } else {
-    profile = new firefox.Profile();
-  }
+  profile = new firefox.Profile('h264profile');
+  profile.setPreference('media.gmp-gmpopenh264.version', '1.5.3'); // openh264
+
   // note: interoperable with Chrome only in FF46+
-  if (options.vp9) {
-    profile.setPreference('media.peerconnection.video.vp9_enabled', true);
-  }
+  profile.setPreference('media.peerconnection.video.vp9_enabled', true);
 
   profile.setPreference('media.navigator.streams.fake', true);
   profile.setPreference('media.navigator.permission.disabled', true);

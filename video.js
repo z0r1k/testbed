@@ -74,7 +74,7 @@ function video(t, browserA, browserB, preferredVideoCodec) {
       var sections = SDPUtils.splitSections(offerWithCandidates.sdp);
       var lines = SDPUtils.splitLines(sections[2]);
       var idx = lines.indexOf('a=rtpmap:107 H264/90000');
-      lines.splice(idx + 1, 0, 'a=fmtp:107 profile-level-id=42e01f;level-asymmetry-allowed=1');
+      lines.splice(idx + 1, 0, 'a=fmtp:107 profile-level-id=42e01f;level-asymmetry-allowed=1;packetization-mode=1');
       sections[2] = lines.join('\r\n');
       offerWithCandidates.sdp = sections.join('') + '\r\n';
     }
@@ -90,6 +90,17 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   })
   .then(function(answerWithCandidates) {
     t.pass('answer ready to signal');
+
+    // this was fixed into Chrome 51 with https://bugs.chromium.org/p/chromium/issues/detail?id=591971
+    if (answerWithCandidates.sdp.indexOf('a=rtpmap:126 H264') !== -1 &&
+        answerWithCandidates.sdp.indexOf('a=fmtp:126') === -1) {
+      var sections = SDPUtils.splitSections(answerWithCandidates.sdp);
+      var lines = SDPUtils.splitLines(sections[2]);
+      var idx = lines.indexOf('a=rtpmap:126 H264/90000');
+      lines.splice(idx + 1, 0, 'a=fmtp:126 profile-level-id=42e01f;level-asymmetry-allowed=1;packetization-mode=1');
+      sections[2] = lines.join('\r\n');
+      answerWithCandidates.sdp = sections.join('') + '\r\n';
+    }
 
     if (preferredVideoCodec) {
       var sections = SDPUtils.splitSections(answerWithCandidates.sdp);
@@ -149,18 +160,15 @@ test('Chrome-Chrome, VP9', function(t) {
   video(t, 'chrome', 'chrome', 'VP9');
 });
 
-/* requires specific flag, currently deactivated since
- * it breaks interop with chrome
 test('Firefox-Firefox, VP9', function(t) {
   video(t, 'firefox', 'firefox', 'VP9');
 });
-*/
 
 // H264 requires Chrome 50+ and a Firefox
 // profile pre-seeded with the right binary,
 // see https://github.com/fippo/testbed/issues/1
 // works but...
-/*
+// fix merged into selenium but pending new webdriver release.
 test('Chrome-Chrome, H264', function(t) {
   video(t, 'chrome', 'chrome', 'H264');
 });
@@ -172,11 +180,9 @@ test('Firefox-Firefox, H264', function(t) {
 test('Chrome-Firefox, H264', function(t) {
   video(t, 'chrome', 'firefox', 'H264');
 });
-
 test('Firefox-Chrome, H264', function(t) {
   video(t, 'firefox', 'chrome', 'H264');
 });
-*/
 
 /*
 test('Edge-Edge', {skip: os.platform() !== 'win32'}, function (t) {
