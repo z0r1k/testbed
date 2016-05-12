@@ -61,7 +61,12 @@ function upgrade(t, browserA, browserB) {
     return getTestpage(driverB);
   })
   .then(function() {
-    clientA.create();
+    return clientA.create();
+  })
+  .then(function() {
+    return clientB.create();
+  })
+  .then(function() {
     return clientA.getUserMedia({audio: true, video: false});
   })
   .then(function() {
@@ -81,7 +86,6 @@ function upgrade(t, browserA, browserB) {
     // mangle interoperable msids.
     offerWithCandidates.sdp = mangle(offerWithCandidates.sdp);
 
-    clientB.create();
     return clientB.setRemoteDescription(offerWithCandidates);
   })
   .then(function() {

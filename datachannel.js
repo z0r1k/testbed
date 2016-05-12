@@ -23,7 +23,12 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
     return getTestpage(driverB);
   })
   .then(function() {
-    clientA.create();
+    return clientA.create();
+  })
+  .then(function() {
+    return clientB.create();
+  })
+  .then(function() {
     return clientA.createDataChannel('somechannel');
   })
   .then(function() {
@@ -35,8 +40,6 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
   })
   .then(function(offerWithCandidates) {
     t.pass('offer ready to signal');
-
-    clientB.create();
     return clientB.setRemoteDescription(offerWithCandidates);
   })
   .then(function() {
