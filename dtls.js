@@ -9,25 +9,31 @@ var os = require('os');
 var test = require('tape');
 var buildDriver = require('./webdriver').buildDriver;
 var startSelenium = require('./webdriver').startServer;
-var getTestpage = require('./webdriver').getTestpage;
 var WebRTCClient = require('./webrtcclient');
 
-function interop(t, browserA, browserB, preferredAudioCodec) {
+function dtls(t, browserA, browserB, preferredAudioCodec) {
   var driverA = buildDriver(browserA, {server: true});
   var driverB = buildDriver(browserB, {server: true});
 
   var clientA = new WebRTCClient(driverA);
   var clientB = new WebRTCClient(driverB);
 
-  getTestpage(driverA)
+  // static page with adapter shim
+  driverA.get('https://fippo.github.io/adapter/testpage.html')
   .then(function() {
-    return getTestpage(driverB);
+    return driverB.get('https://fippo.github.io/adapter/testpage.html');
   })
   .then(function() {
-    return clientA.create();
+    return clientA.create(null, {
+      name: 'ECDSA',
+      namedCurve: 'P-256'
+    });
   })
   .then(function() {
-    return clientB.create();
+    return clientB.create(null, {
+      name: 'ECDSA',
+      namedCurve: 'P-256'
+    });
   })
   .then(function() {
     return clientA.getUserMedia({audio: true});
@@ -41,29 +47,6 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
   })
   .then(function(offer) {
     t.pass('created offer');
-
-    if (preferredAudioCodec) {
-      var sections = SDPUtils.splitSections(offer.sdp);
-      var codecs = SDPUtils.parseRtpParameters(sections[1]).codecs;
-      var pt;
-      for (var i = 0; i < codecs.length; i++) {
-        if (codecs[i].name === preferredAudioCodec) {
-          pt = codecs[i].payloadType;
-          var lines = sections[1].split('\r\n');
-          mLine = lines.shift().split(' ');
-          // remove PT from current pos.
-          mLine.splice(mLine.indexOf(pt.toString()), 1);
-          mLine.splice(3, 0, pt); // insert at first pos.
-          mLine = mLine.join(' ');
-          lines.unshift(mLine);
-          sections[1] = lines.join('\r\n');
-          offer.sdp = sections.join('');
-          break;
-        }
-      }
-      t.ok(pt !== undefined, 'preferred audio codec ' + preferredAudioCodec +
-          ' with PT ' + pt);
-    }
     return clientA.setLocalDescription(offer); // modify offer here?
   })
   .then(function(offerWithCandidates) {
@@ -93,7 +76,11 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
    * here is where the fun starts. getStats etc
    */
   .then(function() {
-    return clientA.getStats();
+    if (browserA !== 'MicrosoftEdge') {
+      return clientA.getStats();
+    } else {
+      return clientB.getStats();
+    }
   })
   .then(function(stats) {
     console.log(stats);
@@ -114,27 +101,19 @@ startSelenium()
 .then(function(server) {
   // start of tests
   test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function(t) {
-    interop(t, 'chrome', 'MicrosoftEdge');
-  });
-
-  test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function(t) {
-    interop(t, 'MicrosoftEdge', 'chrome');
-  });
-
-  test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function(t) {
-    interop(t, 'firefox', 'MicrosoftEdge');
-  });
-
-  test('Edge-Firefox', {skip: os.platform() !== 'win32'}, function(t) {
-    interop(t, 'MicrosoftEdge', 'firefox');
+    dtls(t, 'chrome', 'MicrosoftEdge');
   });
 
   test('Chrome-Firefox', function(t) {
-    interop(t, 'chrome', 'firefox');
+    dtls(t, 'chrome', 'firefox');
   });
 
   test('Firefox-Chrome', function(t) {
-    interop(t, 'firefox', 'chrome');
+    dtls(t, 'firefox', 'chrome');
+  });
+
+  test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function(t) {
+    dtls(t, 'MicrosoftEdge', 'chrome');
   });
 
   // must be the last 'test'. Shuts down the selenium server.

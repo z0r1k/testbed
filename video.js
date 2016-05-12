@@ -24,7 +24,12 @@ function video(t, browserA, browserB, preferredVideoCodec) {
     return getTestpage(driverB);
   })
   .then(function() {
-    clientA.create();
+    return clientA.create();
+  })
+  .then(function() {
+    return clientB.create();
+  })
+  .then(function() {
     return clientA.getUserMedia({audio: true, video: true});
   })
   .then(function() {
@@ -74,7 +79,6 @@ function video(t, browserA, browserB, preferredVideoCodec) {
       offerWithCandidates.sdp = sections.join('') + '\r\n';
     }
 
-    clientB.create();
     return clientB.setRemoteDescription(offerWithCandidates);
   })
   .then(function() {
