@@ -180,9 +180,13 @@ test('Firefox-Firefox, H264', function(t) {
 test('Chrome-Firefox, H264', function(t) {
   video(t, 'chrome', 'firefox', 'H264');
 });
+// does not work in Chrome 50, works in Chrome 51.
+// packets are received by Chrome but not decoded.
+/*
 test('Firefox-Chrome, H264', function(t) {
   video(t, 'firefox', 'chrome', 'H264');
 });
+*/
 
 /*
 test('Edge-Edge', {skip: os.platform() !== 'win32'}, function (t) {
