@@ -184,8 +184,24 @@ test('Firefox-Chrome, H264', function(t) {
   video(t, 'firefox', 'chrome', 'H264');
 });
 
+test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'MicrosoftEdge', 'chrome', 'H264');
+});
+
 /*
+test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'chrome', 'MicrosoftEdge', 'H264');
+});
+
+test('Edge-Firefox', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'MicrosoftEdge', 'firefox', 'H264');
+});
+
+test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'firefox', 'MicrosoftEdge', 'H264');
+});
+
 test('Edge-Edge', {skip: os.platform() !== 'win32'}, function (t) {
-  video(t, 'MicrosoftEdge', 'MicrosoftEdge');
+  video(t, 'MicrosoftEdge', 'MicrosoftEdge', 'H264');
 });
 */
