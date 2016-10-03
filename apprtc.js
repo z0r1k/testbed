@@ -72,20 +72,9 @@ function interop(t, browserA, browserB, queryString) {
   })
   .then(function() {
     // bundle up video frame cheecker.
-    return new Promise(function(resolve, reject) {
-      var bundle = require('browserify')({standalone: 'VideoFrameChecker'});
-      bundle.add('./videoframechecker');
-      bundle.bundle(function(err, source) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(source);
-        }
-      });
-    });
+    return driverA.executeScript(fs.readFileSync('videoframechecker.js').toString());
   })
-  .then(function(framecheckersource) {
-    driverA.executeScript(framecheckersource.toString());
+  .then(function() {
     // avoid timing issues on high latency (relayed) connections.
     driverA.sleep(1000);
     return driverA.executeAsyncScript(function() {
