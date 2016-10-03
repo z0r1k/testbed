@@ -61,6 +61,10 @@ function buildDriver(browser, options) {
   if (options.server) {
     driver = driver.usingServer('http://localhost:4444/wd/hub/');
   }
+
+  if (browser === 'firefox') {
+    driver.getCapabilities().set('marionette', true);
+  }
   driver = driver.build();
 
   // Set global executeAsyncScript() timeout (default is 0) to allow async
