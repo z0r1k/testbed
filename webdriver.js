@@ -13,6 +13,8 @@ if (os.platform() === 'win32') {
   // FIXME: not sure why node_modules\.bin\ is not enough
   process.env.PATH += ';' + process.cwd() +
       '\\node_modules\\chromedriver\\lib\\chromedriver\\';
+  process.env.PATH += ';' + process.cwd() +
+      '\\node_modules\\.bin',
 } else {
   process.env.PATH += ':node_modules/.bin';
 }
