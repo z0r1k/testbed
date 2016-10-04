@@ -14,7 +14,7 @@ if (os.platform() === 'win32') {
   process.env.PATH += ';' + process.cwd() +
       '\\node_modules\\chromedriver\\lib\\chromedriver\\';
   process.env.PATH += ';' + process.cwd() +
-      '\\node_modules\\.bin',
+      '\\node_modules\\.bin';
 } else {
   process.env.PATH += ':node_modules/.bin';
 }
