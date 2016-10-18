@@ -6,13 +6,14 @@
  */
 
 var test = require('tape');
+var fs = require('fs');
 var webdriver = require('selenium-webdriver');
 var buildDriver = require('./webdriver').buildDriver;
 
 // Helper function for basic interop test.
 // see https://apprtc.appspot.com/params.html for queryString options (outdated...)
 function interop(t, browserA, browserB, queryString) {
-  var driverA = buildDriver(browserA);
+  var driverA = buildDriver(browserA, {h264: true});
   var driverB;
 
   var baseURL = 'https://apprtc.appspot.com/';
@@ -37,7 +38,7 @@ function interop(t, browserA, browserB, queryString) {
   })
   .then(function(url) {
     //
-    driverB = buildDriver(browserB);
+    driverB = buildDriver(browserB, {h264: true});
     return driverB.get(url);
   })
   .then(function() {
@@ -158,7 +159,6 @@ test('Firefox-Firefox, H264', function(t) {
   });
 });
 
-/*
 test('Chrome-Chrome, H264', function(t) {
   interop(t, 'chrome', 'chrome', '?vsc=H264&vrc=H264')
   .then(function(info) {
@@ -174,9 +174,7 @@ test('Chrome-Firefox, H264', function(t) {
     t.end();
   });
 });
-*/
 
-/*
 test('Firefox-Chrome, H264', function(t) {
   interop(t, 'firefox', 'chrome', '?vsc=H264&vrc=H264')
   .then(function(info) {
@@ -198,13 +196,24 @@ test('Chrome-Chrome, VP9', function(t) {
     t.end();
   });
 });
-*/
 
-/*
 test('Firefox-Firefox, VP9', function(t) {
   interop(t, 'firefox', 'firefox', '?vsc=VP9&vrc=VP9')
   .then(function(info) {
     t.end();
   });
 });
-*/
+
+test('Chrome-Firefox, VP9', function(t) {
+  interop(t, 'chrome', 'firefox', '?vsc=VP9&vrc=VP9')
+  .then(function(info) {
+    t.end();
+  });
+});
+
+test('Firefox-Chrome, VP9', function(t) {
+  interop(t, 'firefox', 'chrome', '?vsc=VP9&vrc=VP9')
+  .then(function(info) {
+    t.end();
+  });
+});
