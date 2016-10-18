@@ -6,6 +6,7 @@
  */
 
 var test = require('tape');
+var fs = require('fs');
 var webdriver = require('selenium-webdriver');
 var buildDriver = require('./webdriver').buildDriver;
 
@@ -158,7 +159,6 @@ test('Firefox-Firefox, H264', function(t) {
   });
 });
 
-/*
 test('Chrome-Chrome, H264', function(t) {
   interop(t, 'chrome', 'chrome', '?vsc=H264&vrc=H264')
   .then(function(info) {
@@ -174,9 +174,7 @@ test('Chrome-Firefox, H264', function(t) {
     t.end();
   });
 });
-*/
 
-/*
 test('Firefox-Chrome, H264', function(t) {
   interop(t, 'firefox', 'chrome', '?vsc=H264&vrc=H264')
   .then(function(info) {
@@ -198,13 +196,10 @@ test('Chrome-Chrome, VP9', function(t) {
     t.end();
   });
 });
-*/
 
-/*
 test('Firefox-Firefox, VP9', function(t) {
   interop(t, 'firefox', 'firefox', '?vsc=VP9&vrc=VP9')
   .then(function(info) {
     t.end();
   });
 });
-*/
