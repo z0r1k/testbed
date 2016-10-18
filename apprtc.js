@@ -13,7 +13,7 @@ var buildDriver = require('./webdriver').buildDriver;
 // Helper function for basic interop test.
 // see https://apprtc.appspot.com/params.html for queryString options (outdated...)
 function interop(t, browserA, browserB, queryString) {
-  var driverA = buildDriver(browserA);
+  var driverA = buildDriver(browserA, {h264: true});
   var driverB;
 
   var baseURL = 'https://apprtc.appspot.com/';
@@ -38,7 +38,7 @@ function interop(t, browserA, browserB, queryString) {
   })
   .then(function(url) {
     //
-    driverB = buildDriver(browserB);
+    driverB = buildDriver(browserB, {h264: true});
     return driverB.get(url);
   })
   .then(function() {
@@ -199,6 +199,20 @@ test('Chrome-Chrome, VP9', function(t) {
 
 test('Firefox-Firefox, VP9', function(t) {
   interop(t, 'firefox', 'firefox', '?vsc=VP9&vrc=VP9')
+  .then(function(info) {
+    t.end();
+  });
+});
+
+test('Chrome-Firefox, VP9', function(t) {
+  interop(t, 'chrome', 'firefox', '?vsc=VP9&vrc=VP9')
+  .then(function(info) {
+    t.end();
+  });
+});
+
+test('Firefox-Chrome, VP9', function(t) {
+  interop(t, 'firefox', 'chrome', '?vsc=VP9&vrc=VP9')
   .then(function(info) {
     t.end();
   });
