@@ -92,63 +92,39 @@ function interop(t, browserA, browserB) {
     t.pass('videos are in HAVE_ENOUGH_DATA state');
   })
   .then(function() {
-    driverA.quit();
-    // return a new promise so the test can .then and inspect
-    // depending on the querystring.
-    return driverB.quit()
-    .then(function() {
-      return Promise.resolve();
-    });
+    return Promise.all([driverA.quit(), driverB.quit()])
+  })
+  .then(function() {
+    t.end();
   });
 }
 
 test('Chrome-Chrome', function(t) {
   interop(t, 'chrome', 'chrome')
-  .then(function() {
-    t.end();
-  });
 });
 
 test('Firefox-Firefox', function(t) {
   interop(t, 'firefox', 'firefox')
-  .then(function() {
-    t.end();
-  });
 });
 
 test('Chrome-Firefox', function(t) {
   interop(t, 'chrome', 'firefox')
-  .then(function() {
-    t.end();
-  });
 });
 
 test('Firefox-Chrome', function(t) {
   interop(t, 'firefox', 'chrome')
-  .then(function() {
-    t.end();
-  });
 });
 
 /*
 test('Edge-Edge', {skip: os.platform() !== 'win32'}, function(t) {
   interop(t, 'MicrosoftEdge', 'MicrosoftEdge')
-  .then(function() {
-    t.end();
-  });
 });
 
 test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function(t) {
   interop(t, 'chrome', 'MicrosoftEdge')
-  .then(function() {
-    t.end();
-  });
 });
 
 test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function(t) {
   interop(t, 'MicrosoftEdge', 'chrome')
-  .then(function() {
-    t.end();
-  });
 });
 */
