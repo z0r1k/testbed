@@ -99,6 +99,7 @@ function interop(t, browserA, browserB) {
   });
 }
 
+/*
 test('Chrome-Chrome', function(t) {
   interop(t, 'chrome', 'chrome')
 });
@@ -114,8 +115,8 @@ test('Chrome-Firefox', function(t) {
 test('Firefox-Chrome', function(t) {
   interop(t, 'firefox', 'chrome')
 });
+*/
 
-/*
 test('Edge-Edge', {skip: os.platform() !== 'win32'}, function(t) {
   interop(t, 'MicrosoftEdge', 'MicrosoftEdge')
 });
@@ -127,4 +128,3 @@ test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function(t) {
 test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function(t) {
   interop(t, 'MicrosoftEdge', 'chrome')
 });
-*/
