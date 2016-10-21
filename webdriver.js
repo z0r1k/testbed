@@ -41,6 +41,10 @@ function buildDriver(browser, options) {
 
   var firefoxOptions = new firefox.Options()
       .setProfile(profile);
+  if (os.platform() === 'win32') {
+    // TODO: why does geckodriver not find this (fairly standard) path?
+    firefoxOptions.setBinary('C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe');
+  }
 
   // Chrome options.
   var chromeOptions = new chrome.Options()
