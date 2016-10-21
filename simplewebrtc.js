@@ -124,15 +124,15 @@ test('Chrome-Chrome', function(t) {
 });
 
 // geckodriver does not find Firefox binary on Win10?
-test('Firefox-Firefox', {skip: os.platform() === 'win32'}, function(t) {
+test('Firefox-Firefox', function(t) {
   interop(t, 'firefox', 'firefox')
 });
 
-test('Chrome-Firefox', {skip: os.platform() === 'win32'}, function(t) {
+test('Chrome-Firefox', function(t) {
   interop(t, 'chrome', 'firefox')
 });
 
-test('Firefox-Chrome', {skip: os.platform() === 'win32'}, function(t) {
+test('Firefox-Chrome', function(t) {
   interop(t, 'firefox', 'chrome')
 });
 
