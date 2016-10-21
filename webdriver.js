@@ -26,7 +26,7 @@ function buildDriver(browser, options) {
   options = options || {};
   if (options.h264) {
     profile = new firefox.Profile('h264profile');
-    profile.setPreference('media.gmp-gmpopenh264.version', '1.5.3'); // openh264
+    profile.setPreference('media.gmp-gmpopenh264.version', '1.6'); // openh264
   } else {
     profile = new firefox.Profile();
   }
