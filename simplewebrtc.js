@@ -150,3 +150,11 @@ test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function(t) {
 test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function(t) {
   interop(t, 'MicrosoftEdge', 'chrome')
 });
+
+test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function(t) {
+  interop(t, 'firefox', 'MicrosoftEdge')
+});
+
+test('Edge-firefox', {skip: os.platform() !== 'win32'}, function(t) {
+  interop(t, 'MicrosoftEdge', 'firefox')
+});
