@@ -48,10 +48,36 @@ function buildDriver(browser, options) {
       .addArguments('enable-features=WebRTC-H264WithOpenH264FFmpeg')
       .addArguments('allow-file-access-from-files')
       .addArguments('use-fake-device-for-media-stream')
-      .addArguments('use-fake-ui-for-media-stream')
       .addArguments('disable-translate')
       .addArguments('no-process-singleton-dialog')
       .addArguments('mute-audio');
+  if (!options.devices) {
+    chromeOptions.addArguments('use-fake-ui-for-media-stream');
+  } else {
+    // see https://bugs.chromium.org/p/chromium/issues/detail?id=459532#c22
+    var domain = 'https://' + (options.devices.domain || 'localhost') + ':' + (options.devices.port || 443) + ',*';
+    var exceptions = {
+      media_stream_mic: {},
+      media_stream_camera: {}
+    };
+
+    exceptions.media_stream_mic[domain] = {
+      last_used: Date.now(),
+      setting: options.devices.audio ? 1 : 2 // 0: ask, 1: allow, 2: denied
+    };
+    exceptions.media_stream_camera[domain] = {
+      last_used: Date.now(),
+      setting: options.devices.video ? 1 : 2
+    };
+
+    chromeOptions.setUserPreferences({
+      profile: {
+        content_settings: {
+          exceptions: exceptions
+        }
+      }
+    });
+  }
 
   var edgeOptions = new edge.Options();
 
