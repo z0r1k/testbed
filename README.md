@@ -24,6 +24,12 @@ DTLS without announcing this change widely enough. This
 for several mobile applications based on older versions of the webrtc.org library, including
 Facebook Messenger which forced Mozilla to postpone the upgrade for several weeks.
 
+More recently, [SRTP between Firefox 49 and Edge was broken](https://bugzilla.mozilla.org/show_bug.cgi?id=1310061) (in one direction) which went unnoticed
+for two weeks after Firefox 49 rolled out. And Video interop between Chrome Canary (M56) and Edge was broken in one direction as well due to 
+[stricter validation of H264 profile level ids](https://bugs.chromium.org/p/webrtc/issues/detail?id=6552).
+
+Most of these issues have been noticed by people testing manually.
+
 ##Acknowledgements
 This work has been kindly sponsored by the [International Multimedia Telecommunications Consortium](http://www.imtc.org/about/)
 in preparation for the upcoming SuperOp! 2016 event.
@@ -48,7 +54,7 @@ the 10586 version.
 Firefox uses a binary module from the OpenH264 project to provide H264 support. Typically, this
 module is downloaded by Firefox shortly after the creation of a new profile. Since Selenium
 creates a new profile for each test, the binary needs to be provided in a template profile.
-See [this README](h264profile/gmp-gmpopenh264/1.5.3) for details.
+See [this README](h264profile/gmp-gmpopenh264/1.6) for details.
 
 VP9 can be enabled with a flag in Firefox. However, this is compatbile with Chrome only in Firefox 45+.
 

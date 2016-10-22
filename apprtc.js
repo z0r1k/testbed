@@ -6,13 +6,14 @@
  */
 
 var test = require('tape');
+var fs = require('fs');
 var webdriver = require('selenium-webdriver');
 var buildDriver = require('./webdriver').buildDriver;
 
 // Helper function for basic interop test.
 // see https://apprtc.appspot.com/params.html for queryString options (outdated...)
 function interop(t, browserA, browserB, queryString) {
-  var driverA = buildDriver(browserA);
+  var driverA = buildDriver(browserA, {h264: true});
   var driverB;
 
   var baseURL = 'https://apprtc.appspot.com/';
@@ -37,7 +38,7 @@ function interop(t, browserA, browserB, queryString) {
   })
   .then(function(url) {
     //
-    driverB = buildDriver(browserB);
+    driverB = buildDriver(browserB, {h264: true});
     return driverB.get(url);
   })
   .then(function() {
@@ -72,20 +73,9 @@ function interop(t, browserA, browserB, queryString) {
   })
   .then(function() {
     // bundle up video frame cheecker.
-    return new Promise(function(resolve, reject) {
-      var bundle = require('browserify')({standalone: 'VideoFrameChecker'});
-      bundle.add('./videoframechecker');
-      bundle.bundle(function(err, source) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(source);
-        }
-      });
-    });
+    return driverA.executeScript(fs.readFileSync('videoframechecker.js').toString());
   })
-  .then(function(framecheckersource) {
-    driverA.executeScript(framecheckersource.toString());
+  .then(function() {
     // avoid timing issues on high latency (relayed) connections.
     driverA.sleep(1000);
     return driverA.executeAsyncScript(function() {
@@ -169,7 +159,6 @@ test('Firefox-Firefox, H264', function(t) {
   });
 });
 
-/*
 test('Chrome-Chrome, H264', function(t) {
   interop(t, 'chrome', 'chrome', '?vsc=H264&vrc=H264')
   .then(function(info) {
@@ -185,9 +174,7 @@ test('Chrome-Firefox, H264', function(t) {
     t.end();
   });
 });
-*/
 
-/*
 test('Firefox-Chrome, H264', function(t) {
   interop(t, 'firefox', 'chrome', '?vsc=H264&vrc=H264')
   .then(function(info) {
@@ -209,13 +196,24 @@ test('Chrome-Chrome, VP9', function(t) {
     t.end();
   });
 });
-*/
 
-/*
 test('Firefox-Firefox, VP9', function(t) {
   interop(t, 'firefox', 'firefox', '?vsc=VP9&vrc=VP9')
   .then(function(info) {
     t.end();
   });
 });
-*/
+
+test('Chrome-Firefox, VP9', function(t) {
+  interop(t, 'chrome', 'firefox', '?vsc=VP9&vrc=VP9')
+  .then(function(info) {
+    t.end();
+  });
+});
+
+test('Firefox-Chrome, VP9', function(t) {
+  interop(t, 'firefox', 'chrome', '?vsc=VP9&vrc=VP9')
+  .then(function(info) {
+    t.end();
+  });
+});

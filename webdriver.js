@@ -13,6 +13,8 @@ if (os.platform() === 'win32') {
   // FIXME: not sure why node_modules\.bin\ is not enough
   process.env.PATH += ';' + process.cwd() +
       '\\node_modules\\chromedriver\\lib\\chromedriver\\';
+  process.env.PATH += ';' + process.cwd() +
+      '\\node_modules\\geckodriver';
 } else {
   process.env.PATH += ':node_modules/.bin';
 }
@@ -38,6 +40,10 @@ function buildDriver(browser, options) {
 
   var firefoxOptions = new firefox.Options()
       .setProfile(profile);
+  if (os.platform() === 'win32') {
+    // TODO: why does geckodriver not find this (fairly standard) path?
+    firefoxOptions.setBinary('C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe');
+  }
 
   // Chrome options.
   var chromeOptions = new chrome.Options()
@@ -45,10 +51,36 @@ function buildDriver(browser, options) {
       .addArguments('enable-features=WebRTC-H264WithOpenH264FFmpeg')
       .addArguments('allow-file-access-from-files')
       .addArguments('use-fake-device-for-media-stream')
-      .addArguments('use-fake-ui-for-media-stream')
       .addArguments('disable-translate')
       .addArguments('no-process-singleton-dialog')
       .addArguments('mute-audio');
+  if (!options.devices) {
+    chromeOptions.addArguments('use-fake-ui-for-media-stream');
+  } else {
+    // see https://bugs.chromium.org/p/chromium/issues/detail?id=459532#c22
+    var domain = 'https://' + (options.devices.domain || 'localhost') + ':' + (options.devices.port || 443) + ',*';
+    var exceptions = {
+      media_stream_mic: {},
+      media_stream_camera: {}
+    };
+
+    exceptions.media_stream_mic[domain] = {
+      last_used: Date.now(),
+      setting: options.devices.audio ? 1 : 2 // 0: ask, 1: allow, 2: denied
+    };
+    exceptions.media_stream_camera[domain] = {
+      last_used: Date.now(),
+      setting: options.devices.video ? 1 : 2
+    };
+
+    chromeOptions.setUserPreferences({
+      profile: {
+        content_settings: {
+          exceptions: exceptions
+        }
+      }
+    });
+  }
 
   var edgeOptions = new edge.Options();
 
@@ -59,6 +91,10 @@ function buildDriver(browser, options) {
       .forBrowser(browser);
   if (options.server) {
     driver = driver.usingServer('http://localhost:4444/wd/hub/');
+  }
+
+  if (browser === 'firefox') {
+    driver.getCapabilities().set('marionette', true);
   }
   driver = driver.build();
 
