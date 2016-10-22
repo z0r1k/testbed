@@ -54,7 +54,7 @@ the 10586 version.
 Firefox uses a binary module from the OpenH264 project to provide H264 support. Typically, this
 module is downloaded by Firefox shortly after the creation of a new profile. Since Selenium
 creates a new profile for each test, the binary needs to be provided in a template profile.
-See [this README](h264profile/gmp-gmpopenh264/1.5.3) for details.
+See [this README](h264profile/gmp-gmpopenh264/1.6) for details.
 
 VP9 can be enabled with a flag in Firefox. However, this is compatbile with Chrome only in Firefox 45+.
 
