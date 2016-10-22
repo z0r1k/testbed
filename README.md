@@ -24,6 +24,12 @@ DTLS without announcing this change widely enough. This
 for several mobile applications based on older versions of the webrtc.org library, including
 Facebook Messenger which forced Mozilla to postpone the upgrade for several weeks.
 
+More recently, [SRTP between Firefox 49 and Edge was broken](https://bugzilla.mozilla.org/show_bug.cgi?id=1310061) (in one direction) which went unnoticed
+for two weeks after Firefox 49 rolled out. And Video interop between Chrome Canary (M56) and Edge was broken in one direction as well due to 
+[stricter validation of H264 profile level ids](https://bugs.chromium.org/p/webrtc/issues/detail?id=6552).
+
+Most of these issues have been noticed by people testing manually.
+
 ##Acknowledgements
 This work has been kindly sponsored by the [International Multimedia Telecommunications Consortium](http://www.imtc.org/about/)
 in preparation for the upcoming SuperOp! 2016 event.
