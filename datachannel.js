@@ -62,8 +62,7 @@ function interop(t, browserA, browserB, preferredAudioCodec) {
     t.ok(iceConnectionState !== 'failed', 'ICE connection is established');
   })
   .then(function() {
-    driverA.quit();
-    driverB.quit()
+    return Promise.all([driverA.quit(), driverB.quit()])
     .then(function() {
       t.end();
     });

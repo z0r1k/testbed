@@ -12,9 +12,43 @@ var getTestpage = require('./webdriver').getTestpage;
 var WebRTCClient = require('./webrtcclient');
 var SDPUtils = require('sdp');
 
+const TIMEOUT = 30000;
+function waitNVideosExist(driver, n) {
+    return driver.wait(function() {
+        return driver.executeScript(function(n) {
+            return document.querySelectorAll('video').length === n;
+        }, n);
+    }, TIMEOUT);
+}
+
+function waitAllVideosHaveEnoughData(driver) {
+    return driver.wait(function() {
+        return driver.executeScript(function() {
+            var videos = document.querySelectorAll('video');
+            var ready = 0;
+            for (var i = 0; i < videos.length; i++) {
+                if (videos[i].readyState >= videos[i].HAVE_ENOUGH_DATA) {
+                    ready++;
+                }
+            }
+            return ready === videos.length;
+        });
+    }, TIMEOUT);
+}
+
+// Edge Webdriver resolves quit slightly too early, wait a bit.
+function maybeWaitForEdge(browserA, browserB) {
+    if (browserA === 'MicrosoftEdge' || browserB === 'MicrosoftEdge') {
+        return new Promise(function(resolve) {
+            setTimeout(resolve, 2000);
+        });
+    }
+    return Promise.resolve();
+}
+
 function video(t, browserA, browserB, preferredVideoCodec) {
-  var driverA = buildDriver(browserA);
-  var driverB = buildDriver(browserB);
+  var driverA = buildDriver(browserA, {h264: true});
+  var driverB = buildDriver(browserB, {h264: true});
 
   var clientA = new WebRTCClient(driverA);
   var clientB = new WebRTCClient(driverB);
@@ -74,7 +108,7 @@ function video(t, browserA, browserB, preferredVideoCodec) {
       var sections = SDPUtils.splitSections(offerWithCandidates.sdp);
       var lines = SDPUtils.splitLines(sections[2]);
       var idx = lines.indexOf('a=rtpmap:107 H264/90000');
-      lines.splice(idx + 1, 0, 'a=fmtp:107 profile-level-id=42e01f;level-asymmetry-allowed=1');
+      lines.splice(idx + 1, 0, 'a=fmtp:107 profile-level-id=42e01f;level-asymmetry-allowed=1;packetization-mode=1');
       sections[2] = lines.join('\r\n');
       offerWithCandidates.sdp = sections.join('') + '\r\n';
     }
@@ -90,6 +124,17 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   })
   .then(function(answerWithCandidates) {
     t.pass('answer ready to signal');
+
+    // this was fixed into Chrome 51 with https://bugs.chromium.org/p/chromium/issues/detail?id=591971
+    if (answerWithCandidates.sdp.indexOf('a=rtpmap:126 H264') !== -1 &&
+        answerWithCandidates.sdp.indexOf('a=fmtp:126') === -1) {
+      var sections = SDPUtils.splitSections(answerWithCandidates.sdp);
+      var lines = SDPUtils.splitLines(sections[2]);
+      var idx = lines.indexOf('a=rtpmap:126 H264/90000');
+      lines.splice(idx + 1, 0, 'a=fmtp:126 profile-level-id=42e01f;level-asymmetry-allowed=1;packetization-mode=1');
+      sections[2] = lines.join('\r\n');
+      answerWithCandidates.sdp = sections.join('') + '\r\n';
+    }
 
     if (preferredVideoCodec) {
       var sections = SDPUtils.splitSections(answerWithCandidates.sdp);
@@ -109,20 +154,22 @@ function video(t, browserA, browserB, preferredVideoCodec) {
   })
   /*
    * here is where the fun starts. getStats etc
+   * or simply checking the readyState of all videos...
    */
   .then(function() {
-    driverA.sleep(3000);
-    return clientB.getFrameStats();
-  })
-  .then(function(frameStats) {
-    t.ok(frameStats.numFrames > 0, 'video frames received');
+    return waitNVideosExist(driverB, 1);
   })
   .then(function() {
-    driverA.quit();
-    driverB.quit()
+    return waitAllVideosHaveEnoughData(driverB);
+  })
+  .then(function() {
+    Promise.all([driverA.quit(), driverB.quit()])
     .then(function() {
       t.end();
     });
+  })
+  .then(function() {
+    return maybeWaitForEdge(browserA, browserB);
   })
   .catch(function(err) {
     t.fail(err);
@@ -149,18 +196,12 @@ test('Chrome-Chrome, VP9', function(t) {
   video(t, 'chrome', 'chrome', 'VP9');
 });
 
-/* requires specific flag, currently deactivated since
- * it breaks interop with chrome
 test('Firefox-Firefox, VP9', function(t) {
   video(t, 'firefox', 'firefox', 'VP9');
 });
-*/
 
-// H264 requires Chrome 50+ and a Firefox
+// H264 interop requires Chrome 50+ and a Firefox
 // profile pre-seeded with the right binary,
-// see https://github.com/fippo/testbed/issues/1
-// works but...
-/*
 test('Chrome-Chrome, H264', function(t) {
   video(t, 'chrome', 'chrome', 'H264');
 });
@@ -176,10 +217,23 @@ test('Chrome-Firefox, H264', function(t) {
 test('Firefox-Chrome, H264', function(t) {
   video(t, 'firefox', 'chrome', 'H264');
 });
-*/
 
-/*
-test('Edge-Edge', {skip: os.platform() !== 'win32'}, function (t) {
-  video(t, 'MicrosoftEdge', 'MicrosoftEdge');
+test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'MicrosoftEdge', 'chrome', 'H264');
 });
-*/
+
+test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'chrome', 'MicrosoftEdge', 'H264');
+});
+
+test('Edge-Firefox', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'MicrosoftEdge', 'firefox', 'H264');
+});
+
+test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'firefox', 'MicrosoftEdge', 'H264');
+});
+
+test('Edge-Edge', {skip: os.platform() !== 'win32'}, function (t) {
+  video(t, 'MicrosoftEdge', 'MicrosoftEdge', 'H264');
+});

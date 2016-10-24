@@ -86,8 +86,7 @@ function dtls(t, browserA, browserB, preferredAudioCodec) {
     console.log(stats);
   })
   .then(function() {
-    driverA.quit();
-    driverB.quit()
+    return Promise.all([driverA.quit(), driverB.quit()])
     .then(function() {
       t.end();
     });

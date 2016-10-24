@@ -156,8 +156,7 @@ function upgrade(t, browserA, browserB) {
     driverA.sleep(3000);
   })
   .then(function() {
-    driverA.quit();
-    driverB.quit()
+    return Promise.all([driverA.quit(), driverB.quit()])
     .then(function() {
       t.end();
     });

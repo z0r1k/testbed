@@ -30,10 +30,9 @@ function buildDriver(browser, options) {
   } else {
     profile = new firefox.Profile(options.firefoxprofile);
   }
+
   // note: interoperable with Chrome only in FF46+
-  if (options.vp9) {
-    profile.setPreference('media.peerconnection.video.vp9_enabled', true);
-  }
+  profile.setPreference('media.peerconnection.video.vp9_enabled', true);
 
   profile.setPreference('media.navigator.streams.fake', true);
   profile.setPreference('media.navigator.permission.disabled', true);
