@@ -13,8 +13,8 @@ var WebRTCClient = require('./webrtcclient');
 var SDPUtils = require('sdp');
 
 function video(t, browserA, browserB, preferredVideoCodec) {
-  var driverA = buildDriver(browserA);
-  var driverB = buildDriver(browserB);
+  var driverA = buildDriver(browserA, {h264: true});
+  var driverB = buildDriver(browserB, {h264: true});
 
   var clientA = new WebRTCClient(driverA);
   var clientB = new WebRTCClient(driverB);
