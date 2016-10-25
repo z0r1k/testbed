@@ -163,7 +163,7 @@ function video(t, browserA, browserB, preferredVideoCodec) {
     return waitAllVideosHaveEnoughData(driverB);
   })
   .then(function() {
-    Promise.all([driverA.quit(), driverB.quit()])
+    return Promise.all([driverA.quit(), driverB.quit()])
     .then(function() {
       t.end();
     });

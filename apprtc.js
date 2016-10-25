@@ -97,10 +97,7 @@ function interop(t, browserA, browserB, queryString) {
     return driverA.findElement(webdriver.By.id('info-div')).getText();
   })
   .then(function(infotext) {
-    driverA.quit();
-    // return a new promise so the test can .then and inspect
-    // depending on the querystring.
-    return driverB.quit()
+    return Promise.all([driverA.quit(), driverB.quit()])
     .then(function() {
       return Promise.resolve(infotext);
     });
