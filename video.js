@@ -234,6 +234,8 @@ test('Firefox-Edge', {skip: os.platform() !== 'win32'}, function (t) {
   video(t, 'firefox', 'MicrosoftEdge', 'H264');
 });
 
+/*
 test('Edge-Edge', {skip: os.platform() !== 'win32'}, function (t) {
   video(t, 'MicrosoftEdge', 'MicrosoftEdge', 'H264');
 });
+*/

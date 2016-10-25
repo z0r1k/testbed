@@ -44,11 +44,9 @@ and the [samples](https://github.com/webrtc/samples). It uses selenium and
 H264 tests currently require Chrome 50 which adds H264 behind a flag.
 
 ###Microsoft Edge
-The tests for Microsoft Edge only run on Windows currently. Edge is not included in video 
-interoperability tests but will be once a version with interoperable H264 is released.
-
-The Insider Edge Webdriver version 14279 seems to work a lot better without selenium server than
-the 10586 version.
+The tests for Microsoft Edge only run on Windows currently. The video tests require either the
+insider version of Edge (which has H264 enabled by default or the TH2 release of Windows where
+H264 is available behind a flag).
 
 ###Firefox 
 Firefox uses a binary module from the OpenH264 project to provide H264 support. Typically, this
