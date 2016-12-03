@@ -80,6 +80,12 @@ function buildDriver(browser, options) {
         }
       }
     });
+    if (options.devices.screen) {
+      chromeOptions.addArguments('auto-select-desktop-capture-source=' + options.devices.screen);
+    }
+    if (options.devices.extension) {
+      chromeOptions.addArguments('load-extension=' + options.devices.extension);
+    }
   }
 
   var edgeOptions = new edge.Options();
