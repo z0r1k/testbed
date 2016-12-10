@@ -16,7 +16,7 @@ function interop(t, browserA, browserB, queryString) {
   var driverA = buildDriver(browserA, {h264: true});
   var driverB;
 
-  var baseURL = 'https://apprtc.appspot.com/';
+  var baseURL = 'https://appr.tc/';
 
   return driverA.get(baseURL + (queryString || ''))
   .then(function() {
