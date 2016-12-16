@@ -31,8 +31,7 @@ for two weeks after Firefox 49 rolled out. And Video interop between Chrome Cana
 Most of these issues have been noticed by people testing manually.
 
 ##Acknowledgements
-This work has been kindly sponsored by the [International Multimedia Telecommunications Consortium](http://www.imtc.org/about/)
-in preparation for the upcoming SuperOp! 2016 event.
+Many thanks to Bernard Aboba for making me start this!
 
 ##Testing process
 The testing process is based on the process used in [adapter.js](https://github.com/webrtc/adapter)
@@ -57,7 +56,7 @@ See [this README](h264profile/gmp-gmpopenh264/1.6) for details.
 VP9 can be enabled with a flag in Firefox. However, this is compatbile with Chrome only in Firefox 45+.
 
 ##AppRTC tests
-apprtc.js shows how to test the [AppRTC](https://apprtc.appspot.com) example provided by Google.
+apprtc.js shows how to test the [AppRTC](https://appr.tc) example provided by Google.
 It uses a number of URL parameters to tweak application behaviour, e.g. to force the VP9 or H264
 video codec.
 Both ICE connectivity as well as video interoperability is tested. For the latter, the frame checker

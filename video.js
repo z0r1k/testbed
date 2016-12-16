@@ -1,8 +1,5 @@
 /* webrtc interop testing using using selenium
  * Copyright (c) 2016, Philipp Hancke
- * This work has been sponsored by the International Multimedia
- * Teleconferencing Consortium in preparation for the
- * SuperOp! 2016 event.
  */
 
 var os = require('os');
