@@ -1,11 +1,59 @@
 /* Interop testing using apprtc.appspot.com using selenium
  * Copyright (c) 2016, Philipp Hancke
  */
+const test = require('tape');
+const fs = require('fs');
+const webdriver = require('selenium-webdriver');
+const buildDriver = require('./webdriver').buildDriver;
 
-var test = require('tape');
-var fs = require('fs');
-var webdriver = require('selenium-webdriver');
-var buildDriver = require('./webdriver').buildDriver;
+const TIMEOUT = 30000;
+// in apprtc this step is moot since it creates the PC
+// even if there is no other client.
+function waitNPeerConnectionsExist(driver) {
+    return driver.wait(function() {
+        return driver.executeScript(function() {
+            return appController && appController.call_ && appController.call_.pcClient_ && appController.call_.pcClient_.pc_;
+        });
+    }, TIMEOUT);
+}
+
+function waitAllPeerConnectionsConnected(driver) {
+    return driver.wait(function() {
+        return driver.executeScript(function() {
+            var state = appController.call_.pcClient_.pc_.iceConnectionState;
+            return state === 'connected' || state === 'completed';
+        });
+    }, TIMEOUT);
+}
+
+// moot since apprtc always used three videos
+function waitNVideosExist(driver) {
+    return driver.wait(function() {
+        return driver.executeScript(function() {
+            return document.querySelectorAll('video').length === 3;
+        }, n);
+    }, TIMEOUT);
+}
+
+// apprtc uses remote-video
+function waitAllVideosHaveEnoughData(driver) {
+    return driver.wait(function() {
+        return driver.executeScript(function() {
+            var video = document.querySelector('#remote-video');
+            return video.readyState >= video.HAVE_ENOUGH_DATA;
+        });
+    }, TIMEOUT);
+}
+
+// Edge Webdriver resolves quit slightly too early, wait a bit.
+function maybeWaitForEdge(browserA, browserB) {
+    if (browserA === 'MicrosoftEdge' || browserB === 'MicrosoftEdge') {
+        return new Promise(function(resolve) {
+            setTimeout(resolve, 2000);
+        });
+    }
+    return Promise.resolve();
+}
 
 // Helper function for basic interop test.
 // see https://apprtc.appspot.com/params.html for queryString options (outdated...)
@@ -44,170 +92,101 @@ function interop(t, browserA, browserB, queryString) {
   .then(function() {
     t.pass('second browser joined');
     // Show the info box.
-    return driverA.executeScript('appController.infoBox_.showInfoDiv();');
+    //return driverA.executeScript('appController.infoBox_.showInfoDiv();');
   })
   .then(function() {
-    // wait for the ice connection state change to connected/completed.
-    driverA.manage().timeouts().setScriptTimeout(10 * 1000);
-    return driverA.executeAsyncScript(function() {
-      var callback = arguments[arguments.length - 1];
-      var isConnectedOrFailed = function() {
-        var state = appController.call_.pcClient_.pc_.iceConnectionState;
-        if (state === 'connected' || state === 'completed'
-            || state === 'failed') {
-          callback(state);
-        }
-      };
-      appController.call_.pcClient_.pc_
-          .addEventListener('iceconnectionstatechange', isConnectedOrFailed);
-      isConnectedOrFailed();
-    });
-  })
-  .then(function(iceConnectionState) {
-    t.ok(iceConnectionState === 'connected' ||
-        iceConnectionState === 'completed',
-        'ice connection state is connected or completed');
+    return waitNPeerConnectionsExist(driverA);
   })
   .then(function() {
-    // bundle up video frame cheecker.
-    return driverA.executeScript(fs.readFileSync('videoframechecker.js').toString());
+    return waitNPeerConnectionsExist(driverB);
   })
   .then(function() {
-    // avoid timing issues on high latency (relayed) connections.
-    driverA.sleep(1000);
-    return driverA.executeAsyncScript(function() {
-      var callback = arguments[arguments.length - 1];
-      var framechecker = new VideoFrameChecker(
-          document.getElementById('remote-video'));
-      framechecker.checkVideoFrame_(); // start it
-      window.setTimeout(function() {
-        framechecker.stop();
-        callback(framechecker.frameStats);
-      }, 2000);
-    });
-  })
-  .then(function(frameStats) {
-    t.ok(frameStats.numFrames > 0, 'video frames received');
+    return waitAllPeerConnectionsConnected(driverA);
   })
   .then(function() {
-    // Get the info box text.
-    return driverA.findElement(webdriver.By.id('info-div')).getText();
+    return waitAllPeerConnectionsConnected(driverB);
   })
-  .then(function(infotext) {
+  .then(function() {
+    t.pass('videos exist');
+    return waitAllVideosHaveEnoughData(driverA);
+  })
+  .then(function() {
+    t.pass('videos exist');
+    return waitAllVideosHaveEnoughData(driverB);
+  })
+  .then(function() {
+    t.pass('videos are in HAVE_ENOUGH_DATA state');
+  })
+  .then(function() {
     return Promise.all([driverA.quit(), driverB.quit()])
-    .then(function() {
-      return Promise.resolve(infotext);
-    });
+  })
+  .then(function() {
+    return maybeWaitForEdge(browserA, browserB);
+  })
+  .then(function() {
+    t.end();
   });
 }
 
 test('Chrome-Chrome', function(t) {
   interop(t, 'chrome', 'chrome')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 test('Chrome-Firefox', function(t) {
   interop(t, 'chrome', 'firefox')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 test('Firefox-Chrome', function(t) {
   interop(t, 'firefox', 'chrome')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 test('Firefox-Firefox', function(t) {
   interop(t, 'firefox', 'firefox')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 // unclear how to evaluate audio-only
 /*
 test('Chrome-Chrome, audio-only', function(t) {
   interop(t, 'chrome', 'chrome', '?audio=true&video=false')
-  .then(function(info) {
-    t.end();
-  });
 });
 */
 
 test('Chrome-Chrome, icetransports=relay', function(t) {
   interop(t, 'chrome', 'chrome', '?it=relay')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 test('Firefox-Firefox, H264', function(t) {
   interop(t, 'firefox', 'firefox', '?vsc=H264&vrc=H264')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 test('Chrome-Chrome, H264', function(t) {
   interop(t, 'chrome', 'chrome', '?vsc=H264&vrc=H264')
-  .then(function(info) {
-    t.ok(info.indexOf('H264') !== -1, 'H264 is used');
-    t.end();
-  });
 });
 
 test('Chrome-Firefox, H264', function(t) {
   interop(t, 'chrome', 'firefox', '?vsc=H264&vrc=H264')
-  .then(function(info) {
-    t.ok(info.indexOf('H264') !== -1, 'H264 is used');
-    t.end();
-  });
 });
 
 test('Firefox-Chrome, H264', function(t) {
   interop(t, 'firefox', 'chrome', '?vsc=H264&vrc=H264')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 test('Chrome-Chrome, VP8', function(t) {
   interop(t, 'chrome', 'chrome', '?vsc=VP8&vrc=VP8')
-  .then(function(info) {
-    t.ok(info.indexOf('VP8') !== -1, 'VP8 is used');
-    t.end();
-  });
 });
 
 test('Chrome-Chrome, VP9', function(t) {
   interop(t, 'chrome', 'chrome', '?vsc=VP9&vrc=VP9')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 test('Firefox-Firefox, VP9', function(t) {
   interop(t, 'firefox', 'firefox', '?vsc=VP9&vrc=VP9')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 test('Chrome-Firefox, VP9', function(t) {
   interop(t, 'chrome', 'firefox', '?vsc=VP9&vrc=VP9')
-  .then(function(info) {
-    t.end();
-  });
 });
 
 test('Firefox-Chrome, VP9', function(t) {
   interop(t, 'firefox', 'chrome', '?vsc=VP9&vrc=VP9')
-  .then(function(info) {
-    t.end();
-  });
 });
