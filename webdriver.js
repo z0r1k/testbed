@@ -56,11 +56,9 @@ function buildDriver(browser, options) {
       .addArguments('disable-translate')
       .addArguments('no-process-singleton-dialog')
       .addArguments('mute-audio');
-  /*
   if (os.platform() === 'linux' && options.bver) {
     chromeOptions.setChromeBinaryPath('browsers/bin/chrome-' + options.bver);
   }
-  */
   if (!options.devices) {
     chromeOptions.addArguments('use-fake-ui-for-media-stream');
   } else {
