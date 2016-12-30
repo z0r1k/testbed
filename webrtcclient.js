@@ -150,13 +150,6 @@ WebRTCClient.prototype.setRemoteDescription = function(desc) {
       video.autoplay = true;
       video.srcObject = event.stream;
       document.body.appendChild(video);
-
-      if (event.stream.getVideoTracks().length) {
-        window.framechecker = new VideoFrameChecker(video);
-        video.addEventListener('resize', function() {
-          framechecker.checkVideoFrame_(); // start it
-        });
-      }
     };
     pc.setRemoteDescription(new RTCSessionDescription(desc))
     .then(function() {
@@ -194,12 +187,6 @@ WebRTCClient.prototype.getStats = function() {
     .then(function(stats) {
       callback(stats);
     });
-  });
-};
-
-WebRTCClient.prototype.getFrameStats = function() {
-  return this.driver.executeScript(function() {
-    return window.framechecker.frameStats;
   });
 };
 

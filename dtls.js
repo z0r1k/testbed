@@ -5,12 +5,11 @@
 var os = require('os');
 var test = require('tape');
 var buildDriver = require('./webdriver').buildDriver;
-var startSelenium = require('./webdriver').startServer;
 var WebRTCClient = require('./webrtcclient');
 
 function dtls(t, browserA, browserB, preferredAudioCodec) {
-  var driverA = buildDriver(browserA, {server: true});
-  var driverB = buildDriver(browserB, {server: true});
+  var driverA = buildDriver(browserA);
+  var driverB = buildDriver(browserB);
 
   var clientA = new WebRTCClient(driverA);
   var clientB = new WebRTCClient(driverB);
@@ -93,31 +92,18 @@ function dtls(t, browserA, browserB, preferredAudioCodec) {
   });
 }
 
-startSelenium()
-.then(function(server) {
-  // start of tests
-  test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function(t) {
-    dtls(t, 'chrome', 'MicrosoftEdge');
-  });
+test('Chrome-Edge', {skip: os.platform() !== 'win32'}, function(t) {
+  dtls(t, 'chrome', 'MicrosoftEdge');
+});
 
-  test('Chrome-Firefox', function(t) {
-    dtls(t, 'chrome', 'firefox');
-  });
+test('Chrome-Firefox', function(t) {
+  dtls(t, 'chrome', 'firefox');
+});
 
-  test('Firefox-Chrome', function(t) {
-    dtls(t, 'firefox', 'chrome');
-  });
+test('Firefox-Chrome', function(t) {
+  dtls(t, 'firefox', 'chrome');
+});
 
-  test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function(t) {
-    dtls(t, 'MicrosoftEdge', 'chrome');
-  });
-
-  // must be the last 'test'. Shuts down the selenium server.
-  test('shutdown', function(t) {
-    server.kill();
-    t.end();
-  });
-})
-.catch(function(err) {
-  console.error(err);
+test('Edge-Chrome', {skip: os.platform() !== 'win32'}, function(t) {
+  dtls(t, 'MicrosoftEdge', 'chrome');
 });

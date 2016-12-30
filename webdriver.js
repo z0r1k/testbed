@@ -1,13 +1,12 @@
 var os = require('os');
 var fs = require('fs');
 
-var seleniumServer = require('selenium-standalone');
-
 var webdriver = require('selenium-webdriver');
 var chrome = require('selenium-webdriver/chrome');
 var firefox = require('selenium-webdriver/firefox');
 var edge = require('selenium-webdriver/edge');
 
+// setup path for webdriver binaries
 if (os.platform() === 'win32') {
   process.env.PATH += ';C:\\Program Files (x86)\\Microsoft Web Driver\\';
   // FIXME: not sure why node_modules\.bin\ is not enough
@@ -32,7 +31,7 @@ function buildDriver(browser, options) {
   }
 
   // note: interoperable with Chrome only in FF46+
-  profile.setPreference('media.peerconnection.video.vp9_enabled', true);
+  //profile.setPreference('media.peerconnection.video.vp9_enabled', true);
 
   profile.setPreference('media.navigator.streams.fake', true);
   profile.setPreference('media.navigator.permission.disabled', true);
@@ -119,33 +118,9 @@ function buildDriver(browser, options) {
 // static page that includes adapter.js 
 function getTestpage(driver) {
     return driver.get('https://fippo.github.io/adapter/testpage.html')
-    .then(function() {
-        return driver.executeScript(fs.readFileSync('videoframechecker.js').toString());
-    });
-}
-
-function startServer() {
-  return new Promise(function(resolve, reject) {
-    seleniumServer.install({
-      drivers: {
-        chrome: {},
-        firefox: {},
-        ie: false
-      }
-    }, function(err, cb) {
-      seleniumServer.start(function(err, child) {
-        if (err) {
-          reject(err);
-          return;
-        }
-        return resolve(child);
-      });
-    });
-  });
 }
 
 module.exports = {
   buildDriver: buildDriver,
   getTestpage: getTestpage,
-  startServer: startServer
 };
