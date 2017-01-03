@@ -36,6 +36,7 @@ function buildDriver(browser, options) {
   profile.setPreference('media.navigator.streams.fake', true);
   profile.setPreference('media.navigator.permission.disabled', true);
   profile.setPreference('xpinstall.signatures.required', false);
+  profile.setPreference('media.navigator.video.red_ulpfec_enabled', true);
 
   var firefoxOptions = new firefox.Options()
       .setProfile(profile);
